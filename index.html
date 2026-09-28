@@ -5939,6 +5939,11 @@ body.light .hero-pill{
       <input type="email" id="signupEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
     </div>
 
+    <div class="auth-field" id="signupPasswordField">
+      <label for="signupPassword">비밀번호 (6자 이상)</label>
+      <input type="password" id="signupPassword" class="auth-input" placeholder="다른 기기에서도 이 비밀번호로 로그인해요" autocomplete="new-password" minlength="6">
+    </div>
+
     <label class="auth-agree">
       <input type="checkbox" id="signupAgree">
       <span>
@@ -8476,13 +8481,52 @@ window.MrfAuth = (function(){
   var KEY_USER = 'sc_user_v1';
   var KEY_SUB  = 'sc_sub_v1';
   var KEY_PAYMENTS = 'sc_payments_v1';
+  var KEY_TOKEN = 'sc_token_v1'; // server session token — accounts now live on the server (KV), this device just caches state
 
   var PRICE_MONTHLY = 9900;
   var PRICE_ONCE    = 11900;
   var TRIAL_DAYS    = 3;
 
+  // ---------- Server API helpers ----------
+  // All account/subscription state is authoritative on the server (Cloudflare
+  // Pages Functions + KV). localStorage below is only a fast local cache so
+  // the UI keeps working the same way it always has (getUser/getStatus stay
+  // synchronous) — every write-path also pushes to the server and refreshes
+  // the cache from its response, so state survives cleared cookies / new
+  // devices / new browsers as long as the user logs back in.
+  function _token(){ try { return localStorage.getItem(KEY_TOKEN); } catch(e){ return null; } }
+  function _setToken(t){ try { if(t) localStorage.setItem(KEY_TOKEN, t); else localStorage.removeItem(KEY_TOKEN); } catch(e){} }
+  function _api(path, opts){
+    opts = opts || {};
+    var headers = { 'Content-Type': 'application/json' };
+    var tok = _token();
+    if(tok) headers['Authorization'] = 'Bearer ' + tok;
+    return fetch(path, {
+      method: opts.method || 'POST',
+      headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(data){
+        if(!res.ok) { var err = new Error(data.error || '요청에 실패했습니다.'); err.status = res.status; err.data = data; throw err; }
+        return data;
+      });
+    });
+  }
+  // Overwrite the local cache from a server response (server is the source of truth)
+  function _applyServerState(data){
+    if(data.token) _setToken(data.token);
+    if(data.user){
+      var cur = _get(KEY_USER) || {};
+      _set(KEY_USER, Object.assign({}, cur, data.user, { signupDate: cur.signupDate || new Date().toISOString() }));
+    }
+    _set(KEY_SUB, data.subscription || null);
+    _set(KEY_PAYMENTS, data.payments || []);
+  }
+
   var pendingPlanType = 'monthly'; // 'monthly' | 'once'
+  var pendingIsOAuth = false;
   var pendingEmail = '';
+  var pendingPassword = '';
 
   // ---------- Storage helpers ----------
   function _get(key){
@@ -8629,8 +8673,9 @@ window.MrfAuth = (function(){
   }
 
   // ---------- Signup flow ----------
-  function startSignup(planType){
+  function startSignup(planType, viaOAuth){
     pendingPlanType = planType === 'once' ? 'once' : 'monthly';
+    pendingIsOAuth = !!viaOAuth;
     var price = pendingPlanType === 'once' ? PRICE_ONCE : PRICE_MONTHLY;
     var billDate = pendingPlanType === 'once'
       ? new Date() // 1개월권은 즉시 결제
@@ -8652,13 +8697,18 @@ window.MrfAuth = (function(){
 
     // Wire up validation
     var email = $('signupEmail');
+    var pwField = $('signupPasswordField');
+    var pw = $('signupPassword');
     var agree = $('signupAgree');
     var btn = $('signupNextBtn');
+    if(pwField) pwField.style.display = pendingIsOAuth ? 'none' : '';
     function validate(){
-      var ok = email.value.indexOf('@') > 0 && email.value.indexOf('.') > 0 && agree.checked;
-      btn.disabled = !ok;
+      var okEmail = email.value.indexOf('@') > 0 && email.value.indexOf('.') > 0;
+      var okPw = pendingIsOAuth || (pw && pw.value.length >= 6);
+      btn.disabled = !(okEmail && okPw && agree.checked);
     }
     email.oninput = validate;
+    if(pw) pw.oninput = validate;
     agree.onchange = validate;
     validate();
 
@@ -8666,19 +8716,12 @@ window.MrfAuth = (function(){
     setTimeout(function(){ email.focus(); }, 100);
   }
 
-  function goToPayment(){
-    var email = document.getElementById('signupEmail').value.trim();
-    if(!email || email.indexOf('@') < 0) { alert('이메일을 확인해주세요.'); return; }
-    if(!document.getElementById('signupAgree').checked){ alert('약관에 동의해주세요.'); return; }
-
-    pendingEmail = email;
-    closeModal('authSignup');
-
+  function _preparePaymentModal(email){
     var price = pendingPlanType === 'once' ? PRICE_ONCE : PRICE_MONTHLY;
     var billDate = pendingPlanType === 'once' ? new Date() : _addDays(new Date(), TRIAL_DAYS);
 
     var $ = function(id){ return document.getElementById(id); };
-    if($('paymentEmail')) $('paymentEmail').textContent = email;
+    if($('paymentEmail')) $('paymentEmail').textContent = email || '';
     if($('paymentFirstDate')) $('paymentFirstDate').textContent = _fmtDate(billDate);
     if($('paymentAmount')) $('paymentAmount').textContent = price.toLocaleString() + '원';
 
@@ -8702,80 +8745,86 @@ window.MrfAuth = (function(){
     setTimeout(function(){ cardNum.focus(); }, 100);
   }
 
+  function goToPayment(){
+    var email = document.getElementById('signupEmail').value.trim();
+    if(!email || email.indexOf('@') < 0) { alert('이메일을 확인해주세요.'); return; }
+    if(!document.getElementById('signupAgree').checked){ alert('약관에 동의해주세요.'); return; }
+    var pwEl = document.getElementById('signupPassword');
+    if(!pendingIsOAuth){
+      if(!pwEl || pwEl.value.length < 6){ alert('비밀번호를 6자 이상 입력해주세요. 다른 기기에서 로그인할 때 필요해요.'); return; }
+      pendingPassword = pwEl.value;
+    } else {
+      pendingPassword = '';
+    }
+
+    pendingEmail = email;
+    closeModal('authSignup');
+    _preparePaymentModal(email);
+  }
+
   function submitPayment(){
-    // Demo: accept any input, don't actually process
+    // Demo: accept any input, don't actually process a real charge — this
+    // just registers the plan. (Real card data is never sent anywhere; the
+    // number here never leaves the browser except its last 4 digits.)
     var card = document.getElementById('cardNumber').value.replace(/\s/g,'');
     if(card.length < 4){
       alert('카드번호를 입력해주세요. (데모 모드: 아무 숫자나 입력 가능)');
       return;
     }
+    var cardLast4 = card.slice(-4);
+    var btn = document.querySelector('#authPayment .auth-btn');
+    if(btn){ btn.disabled = true; btn.textContent = '처리 중...'; }
 
-    var now = new Date();
-    var user = { email: pendingEmail, signupDate: now.toISOString() };
-    _set(KEY_USER, user);
+    // Already have a server session (existing logged-in user starting/renewing
+    // a plan, e.g. after trial expired, or an OAuth user with no plan yet) →
+    // just tell the server to start the plan on their existing account.
+    // Otherwise this is a brand-new email+password account.
+    var request = _token()
+      ? _api('/api/subscription', { body: { action: 'start', planType: pendingPlanType, cardLast4: cardLast4 } })
+      : _api('/api/auth/signup', { body: { email: pendingEmail, password: pendingPassword, planType: pendingPlanType, cardLast4: cardLast4 } });
 
-    var sub;
-    if(pendingPlanType === 'once'){
-      // 1개월 이용권 - immediate 30-day period, no auto-renewal
-      sub = {
-        status: 'once',
-        plan: 'once',
-        startDate: now.toISOString(),
-        periodStart: now.toISOString(),
-        periodEnd: _addDays(now, 30).toISOString(),
-        cardLast4: card.slice(-4),
-        amount: PRICE_ONCE
-      };
-    } else {
-      // Monthly - 3-day trial then auto-billing
-      sub = {
-        status: 'trial',
-        plan: 'monthly',
-        startDate: now.toISOString(),
-        trialStart: now.toISOString(),
-        trialEnd: _addDays(now, TRIAL_DAYS).toISOString(),
-        periodStart: now.toISOString(),
-        periodEnd: _addDays(now, TRIAL_DAYS).toISOString(),
-        cardLast4: card.slice(-4),
-        amount: PRICE_MONTHLY
-      };
-    }
-    _set(KEY_SUB, sub);
+    request.then(function(data){
+      _applyServerState(data);
+      pendingPassword = ''; // never keep this around longer than needed
+      var sub = data.subscription;
 
-    // 1개월권은 즉시 결제가 발생 → 결제 내역에 기록.
-    // 월간 구독은 3일 무료체험 후 첫 결제가 발생하므로 지금은 기록하지 않음
-    // (실제 Toss 연동 시: 매 결제승인 웹훅마다 addPayment 호출로 교체)
-    if(pendingPlanType === 'once'){
-      addPayment({
-        date: now.toISOString(),
-        planName: 'Pro 1개월 이용권',
-        amount: PRICE_ONCE,
-        cardLast4: card.slice(-4),
-        method: '카드',
-        status: '결제완료'
-      });
-    }
+      closeModal('authPayment');
 
-    closeModal('authPayment');
+      // Populate success modal
+      var $ = function(id){ return document.getElementById(id); };
+      if($('successEmail')) $('successEmail').textContent = pendingEmail;
+      if(sub && sub.plan === 'once'){
+        if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.periodEnd) + '까지';
+        if($('successBillDate')) $('successBillDate').textContent = '자동갱신 없음';
+      } else if(sub && sub.status === 'trial'){
+        if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.trialEnd);
+        if($('successBillDate')) $('successBillDate').textContent = _fmtDate(sub.trialEnd);
+      } else if(sub){
+        if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.periodEnd) + '까지';
+        if($('successBillDate')) $('successBillDate').textContent = _fmtDate(sub.periodEnd);
+      }
 
-    // Populate success modal
-    var $ = function(id){ return document.getElementById(id); };
-    if($('successEmail')) $('successEmail').textContent = pendingEmail;
-    if(pendingPlanType === 'once'){
-      if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.periodEnd) + '까지';
-      if($('successBillDate')) $('successBillDate').textContent = '자동갱신 없음';
-    } else {
-      if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.trialEnd);
-      if($('successBillDate')) $('successBillDate').textContent = _fmtDate(sub.trialEnd);
-    }
-
-    openModal('authSuccess');
-    updateAllUI();
+      openModal('authSuccess');
+      updateAllUI();
+    }).catch(function(err){
+      if(err.status === 409){
+        alert('이미 가입된 이메일입니다. 로그인해주세요.');
+        closeModal('authPayment');
+        openModal('authLogin');
+      } else {
+        alert(err.message || '결제 등록에 실패했습니다. 다시 시도해주세요.');
+      }
+    }).finally(function(){
+      if(btn){ btn.disabled = false; btn.textContent = '✨ 3일 무료로 시작하기'; }
+    });
   }
 
-  // ---------- Login (existing user demo) ----------
-  var MASTER_EMAIL = 'freelyfree@gmail.com';
-  var MASTER_PW    = '1234';
+  // ---------- Login (server-verified) ----------
+  // NOTE: there is no master password here anymore — it lives only as an
+  // encrypted environment variable on the Cloudflare Pages project and is
+  // checked inside /functions/api/auth/login.js, server-side. This client
+  // bundle is public (view-source), so nothing that must stay secret can
+  // live here.
   var KEY_REMEMBER = 'sc_remember_v1';
 
   // 기억하기: 저장된 정보 자동 채우기
@@ -8784,10 +8833,8 @@ window.MrfAuth = (function(){
       var saved = JSON.parse(localStorage.getItem(KEY_REMEMBER) || 'null');
       if(!saved) return;
       var eEl = document.getElementById('loginEmail');
-      var pEl = document.getElementById('loginPw');
       var cEl = document.getElementById('loginRemember');
       if(eEl) eEl.value = saved.email || '';
-      if(pEl) pEl.value = saved.pw || '';
       if(cEl) cEl.checked = true;
     } catch(e){}
   }
@@ -8804,52 +8851,45 @@ window.MrfAuth = (function(){
     if(!email || email.indexOf('@') < 0){ alert('이메일을 확인해주세요.'); return; }
     if(!pw){ alert('비밀번호를 입력해주세요.'); return; }
 
-    // 기억하기 저장
+    // 기억하기 저장 (이메일만 — 비밀번호는 더 이상 브라우저에 저장하지 않습니다)
     if(remember){
-      try{ localStorage.setItem(KEY_REMEMBER, JSON.stringify({ email: email, pw: pw })); }catch(e){}
+      try{ localStorage.setItem(KEY_REMEMBER, JSON.stringify({ email: email })); }catch(e){}
     } else {
       try{ localStorage.removeItem(KEY_REMEMBER); }catch(e){}
     }
 
-    // ── 마스터 계정 ──
-    if(email === MASTER_EMAIL && pw === MASTER_PW){
-      var masterUser = { email: MASTER_EMAIL, signupDate: new Date().toISOString(), master: true };
-      _set(KEY_USER, masterUser);
-      var far = new Date(); far.setFullYear(far.getFullYear() + 100);
-      var masterSub = {
-        status: 'active', plan: 'master',
-        trialEnd: far.toISOString(), periodStart: new Date().toISOString(), periodEnd: far.toISOString()
-      };
-      _set(KEY_SUB, masterSub);
+    var btn = document.querySelector('#authLogin .auth-btn');
+    if(btn){ btn.disabled = true; }
+
+    _api('/api/auth/login', { body: { email: email, password: pw } }).then(function(data){
+      _applyServerState(data);
       closeModal('authLogin');
       updateAllUI();
       setTimeout(function(){
-        if(typeof toast === 'function') toast('마스터 계정으로 로그인됐어요 👑 모든 기능이 활성화됐습니다.');
-      }, 300);
-      MrfRouter && MrfRouter.go('app');
-      return;
-    }
-
-    // ── 일반 계정 ──
-    var user = getUser();
-    if(!user || user.email.toLowerCase() !== email){
-      // User not found in this browser — offer to restart trial
-      if(confirm('이 브라우저에 저장된 계정 정보가 없습니다.\n\n다른 기기에서 가입하셨다면 무료체험을 다시 시작해 주세요.\n\n무료체험 시작 화면으로 이동할까요?')){
-        closeModal('authLogin');
-        startSignup();
-        setTimeout(function(){
-          var em = document.getElementById('signupEmail');
-          if(em){ em.value = email; em.dispatchEvent(new Event('input',{bubbles:true})); }
-        }, 250);
+        MrfRouter && MrfRouter.go('app');
+        if(typeof toast === 'function'){
+          toast(data.user && data.user.master ? '마스터 계정으로 로그인됐어요 👑 모든 기능이 활성화됐습니다.' : '로그인됐어요 👋');
+        }
+      }, 100);
+    }).catch(function(err){
+      if(err.status === 404){
+        // No server account under this email — offer to start a trial instead
+        if(confirm('가입된 계정을 찾을 수 없습니다.\n\n아직 가입 전이라면 무료체험을 시작해 주세요.\n\n무료체험 시작 화면으로 이동할까요?')){
+          closeModal('authLogin');
+          startSignup();
+          setTimeout(function(){
+            var em = document.getElementById('signupEmail');
+            if(em){ em.value = email; em.dispatchEvent(new Event('input',{bubbles:true})); }
+          }, 250);
+        }
+      } else if(err.status === 429){
+        alert(err.message);
+      } else {
+        alert(err.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
       }
-      return;
-    }
-    closeModal('authLogin');
-    updateAllUI();
-    setTimeout(function(){
-      MrfRouter && MrfRouter.go('app');
-      if(typeof toast==='function') toast('로그인됐어요 👋');
-    }, 100);
+    }).finally(function(){
+      if(btn){ btn.disabled = false; }
+    });
   }
 
   // ---------- Social Login ----------
@@ -8872,52 +8912,30 @@ window.MrfAuth = (function(){
   }
 
   // Shared handler — takes userInfo object {email, name}
-  function _handleGoogleUser(userInfo){
-    var email = (userInfo.email || '').toLowerCase().trim();
-    var name  = userInfo.name  || userInfo.given_name || '';
-    if(!email){
-      if(typeof toast==='function') toast('Google 계정에서 이메일을 가져오지 못했습니다.');
+  // userInfo is only used for a quick "as who" toast — the server independently
+  // re-verifies the token with Google and is the one that decides the email.
+  function _handleGoogleUser(userInfo, tokenPayload){
+    if(!tokenPayload || (!tokenPayload.accessToken && !tokenPayload.idToken)){
+      if(typeof toast==='function') toast('Google 로그인 오류 — 이메일로 로그인해 주세요.');
       return;
     }
-    var existingUser = _get(KEY_USER);
-    if(existingUser && existingUser.email && existingUser.email.toLowerCase() === email){
-      // Returning user — restore session
+    _api('/api/auth/oauth', { body: { provider: 'google', accessToken: tokenPayload.accessToken, idToken: tokenPayload.idToken } }).then(function(data){
+      _applyServerState(data);
       closeModal('authLogin');
       closeModal('authSignup');
       updateAllUI();
       setTimeout(function(){
         if(window.MrfRouter) MrfRouter.go('app');
-        if(typeof toast==='function') toast('Google 계정으로 로그인됐어요 ✅');
+        if(typeof toast==='function') toast(data.isNew ? 'Google 계정으로 가입됐어요 🎉' : 'Google 계정으로 로그인됐어요 ✅');
       }, 200);
-    } else {
-      // New user — create free account and log in
-      var user = {
-        email: email,
-        name: name || email.split('@')[0],
-        signupDate: new Date().toISOString(),
-        plan: 'free',
-        provider: 'google'
-      };
-      _set(KEY_USER, user);
-      closeModal('authLogin');
-      closeModal('authSignup');
-      updateAllUI();
-      setTimeout(function(){
-        if(window.MrfRouter) MrfRouter.go('app');
-        if(typeof toast==='function') toast('Google 계정으로 가입됐어요 🎉 무료 플랜으로 시작합니다!');
-      }, 200);
-    }
+    }).catch(function(err){
+      if(typeof toast==='function') toast(err.message || 'Google 인증에 실패했습니다.');
+    });
   }
 
   // Legacy JWT credential handler (kept for compatibility)
   function _handleGoogleCredential(response){
-    try{
-      var parts = response.credential.split('.');
-      var payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-      _handleGoogleUser({ email: payload.email, name: payload.name });
-    } catch(e){
-      if(typeof toast==='function') toast('Google 로그인 오류 — 이메일로 로그인해 주세요.');
-    }
+    _handleGoogleUser(null, { idToken: response.credential });
   }
 
   function _doGoogleOAuth(){
@@ -8930,10 +8948,7 @@ window.MrfAuth = (function(){
             if(typeof toast==='function') toast('Google 로그인이 취소됐습니다.');
             return;
           }
-          fetch('https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + tokenResponse.access_token)
-            .then(function(r){ return r.json(); })
-            .then(function(userInfo){ _handleGoogleUser(userInfo); })
-            .catch(function(){ if(typeof toast==='function') toast('Google 정보를 가져오지 못했습니다.'); });
+          _handleGoogleUser(null, { accessToken: tokenResponse.access_token });
         }
       });
       client.requestAccessToken({ prompt: 'select_account' });
@@ -9012,31 +9027,39 @@ window.MrfAuth = (function(){
     document.head.appendChild(s);
   }
 
-  function _handleKakaoUser(kakaoUser){
-    var account = kakaoUser.kakao_account || {};
-    var profile = account.profile || {};
-    var email = account.email || ('kakao_' + kakaoUser.id + '@kakao');
+  // The server independently re-verifies accessToken with Kakao's own API and
+  // decides the real email — kakaoUser here is only used for a display name.
+  function _handleKakaoUser(kakaoUser, accessToken){
+    var profile = ((kakaoUser && kakaoUser.kakao_account) || {}).profile || {};
     var name = profile.nickname || '';
 
-    var existingUser = _get(KEY_USER);
-    if(existingUser && existingUser.email && existingUser.email.toLowerCase() === email.toLowerCase()){
-      closeModal('authLogin');
-      closeModal('authSignup');
-      updateAllUI();
-      setTimeout(function(){
-        if(window.MrfRouter) MrfRouter.go('app');
-        if(typeof toast==='function') toast('카카오 계정으로 로그인됐어요 ✅');
-      }, 200);
-    } else {
-      pendingEmail = email;
-      closeModal('authLogin');
-      startSignup();
-      setTimeout(function(){
-        var em = document.getElementById('signupEmail');
-        if(em){ em.value = email; em.dispatchEvent(new Event('input',{bubbles:true})); }
-        if(name && document.getElementById('signupName')) document.getElementById('signupName').value = name;
-      }, 250);
-    }
+    _api('/api/auth/oauth', { body: { provider: 'kakao', accessToken: accessToken } }).then(function(data){
+      _applyServerState(data);
+      if(data.subscription){
+        // Returning user who already has a plan — just log them in
+        closeModal('authLogin');
+        closeModal('authSignup');
+        updateAllUI();
+        setTimeout(function(){
+          if(window.MrfRouter) MrfRouter.go('app');
+          if(typeof toast==='function') toast('카카오 계정으로 로그인됐어요 ✅');
+        }, 200);
+      } else {
+        // No plan yet (brand-new, or returning without ever subscribing) —
+        // still need a card on file to start the trial, same as email signup.
+        pendingEmail = data.user.email;
+        pendingIsOAuth = true;
+        closeModal('authLogin');
+        startSignup(undefined, true);
+        setTimeout(function(){
+          var em = document.getElementById('signupEmail');
+          if(em){ em.value = data.user.email; em.dispatchEvent(new Event('input',{bubbles:true})); }
+          if(name && document.getElementById('signupName')) document.getElementById('signupName').value = name;
+        }, 250);
+      }
+    }).catch(function(err){
+      if(typeof toast==='function') toast(err.message || '카카오 인증에 실패했습니다. 이메일로 로그인해 주세요.');
+    });
   }
 
   function _fetchKakaoUserByToken(token){
@@ -9044,7 +9067,7 @@ window.MrfAuth = (function(){
       headers:{ 'Authorization':'Bearer '+token }
     })
     .then(function(r){ return r.json(); })
-    .then(function(res){ _handleKakaoUser(res); })
+    .then(function(res){ _handleKakaoUser(res, token); })
     .catch(function(){
       if(typeof toast==='function') toast('카카오 정보를 불러올 수 없습니다. 이메일로 로그인해 주세요.');
     });
@@ -9144,8 +9167,12 @@ window.MrfAuth = (function(){
 
   // ---------- Logout ----------
   function logout(){
+    var tok = _token();
+    if(tok){ _api('/api/logout', { body: {} }).catch(function(){}); }
     _del(KEY_USER);
     _del(KEY_SUB);
+    _del(KEY_PAYMENTS);
+    _setToken(null);
     try{ localStorage.removeItem(KEY_REMEMBER); }catch(e){}
     updateAllUI();
     if(window.MrfRouter) MrfRouter.go('landing');
@@ -9287,32 +9314,30 @@ window.MrfAuth = (function(){
   function confirmCancel(){
     var sub = getSubscription();
     if(!sub) return;
-    var status = getStatus();
-    if(status === 'trial'){
-      sub.status = 'expired';
-      sub.cancelledAt = new Date().toISOString();
-      _set(KEY_SUB, sub);
+    var wasTrial = getStatus() === 'trial';
+    var periodEndLabel = _fmtDate(sub.periodEnd);
+    _api('/api/subscription', { body: { action: 'confirmCancel' } }).then(function(data){
+      _applyServerState({ subscription: data.subscription, payments: data.payments });
       closeModal('authCancel');
-      alert('무료체험이 종료되었습니다.');
-    } else {
-      sub.status = 'cancelled';
-      sub.cancelledAt = new Date().toISOString();
-      _set(KEY_SUB, sub);
-      closeModal('authCancel');
-      alert('구독이 해지되었습니다. ' + _fmtDate(sub.periodEnd) + '까지 계속 사용하실 수 있어요.');
-    }
-    updateAllUI();
+      if(wasTrial) alert('무료체험이 종료되었습니다.');
+      else alert('구독이 해지되었습니다. ' + periodEndLabel + '까지 계속 사용하실 수 있어요.');
+      updateAllUI();
+    }).catch(function(err){
+      alert(err.message || '해지 처리에 실패했습니다. 다시 시도해주세요.');
+    });
   }
 
   // ---------- Reactivate ----------
   function reactivate(){
     var sub = getSubscription();
     if(!sub) return;
-    sub.status = 'active';
-    delete sub.cancelledAt;
-    _set(KEY_SUB, sub);
-    alert('구독이 재활성화되었습니다.');
-    updateAllUI();
+    _api('/api/subscription', { body: { action: 'reactivate' } }).then(function(data){
+      _applyServerState({ subscription: data.subscription, payments: data.payments });
+      alert('구독이 재활성화되었습니다.');
+      updateAllUI();
+    }).catch(function(err){
+      alert(err.message || '재활성화에 실패했습니다. 다시 시도해주세요.');
+    });
   }
 
   // ---------- UI updates ----------
@@ -9528,6 +9553,27 @@ window.MrfAuth = (function(){
     if(GOOGLE_CLIENT_ID) {
       setTimeout(function(){ _loadGIS(function(){}); }, 1500);
     }
+
+    // If we have a server session token, refresh the cached user/subscription
+    // from the server on load — this is what makes "log in on a new device"
+    // and "cleared my browser data" actually work: the server, not this
+    // browser, is the source of truth.
+    refreshFromServer();
+  }
+
+  function refreshFromServer(){
+    var tok = _token();
+    if(!tok) return;
+    _api('/api/session', { method: 'GET' }).then(function(data){
+      _applyServerState(data);
+      updateAllUI();
+    }).catch(function(err){
+      if(err.status === 401){
+        // Session expired/invalid — log out locally so the UI doesn't show stale state
+        _del(KEY_USER); _del(KEY_SUB); _del(KEY_PAYMENTS); _setToken(null);
+        updateAllUI();
+      }
+    });
   }
 
   // Expose
@@ -9578,8 +9624,10 @@ window.MrfAuth = (function(){
     unifiedStart: function(){
       var user = getUser();
       if(user){
-        // 이미 로그인 → 결제 모달로 바로 이동
-        openModal('authPayment');
+        // 이미 로그인 → 결제 모달로 바로 이동 (기존 세션 토큰으로 재구독 처리됨)
+        pendingEmail = user.email;
+        pendingPlanType = 'monthly';
+        _preparePaymentModal(user.email);
       } else {
         // 미로그인 → 회원가입 모달 열고 완료 후 결제로 이어지도록 플래그 설정
         localStorage.setItem('sc_after_signup', 'payment');
