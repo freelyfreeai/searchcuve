@@ -8475,6 +8475,7 @@ $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const t=$('cha
 window.MrfAuth = (function(){
   var KEY_USER = 'sc_user_v1';
   var KEY_SUB  = 'sc_sub_v1';
+  var KEY_PAYMENTS = 'sc_payments_v1';
 
   var PRICE_MONTHLY = 9900;
   var PRICE_ONCE    = 11900;
@@ -8519,6 +8520,42 @@ window.MrfAuth = (function(){
   // ---------- Public: state getters ----------
   function getUser(){ return _get(KEY_USER); }
   function getSubscription(){ return _get(KEY_SUB); }
+  function getSubscriptionInfo(){
+    var sub = getSubscription();
+    if(!sub) return {};
+    return {
+      plan: sub.plan,
+      status: sub.status,
+      amount: sub.amount,
+      cardLast4: sub.cardLast4,
+      trialEnd: sub.trialEnd,
+      periodEnd: sub.periodEnd,
+      expiresAt: sub.plan === 'once' ? sub.periodEnd : sub.periodEnd
+    };
+  }
+
+  // ---------- Payment history (local demo ledger) ----------
+  // NOTE: this is a client-side ledger for demo/UI purposes only.
+  // Once TossPayments 심사 완료 → replace addPayment() calls with real
+  // webhook-confirmed entries (결제승인 응답을 그대로 기록) so the UI below
+  // needs no further changes.
+  function getPayments(){
+    var list = _get(KEY_PAYMENTS);
+    return Array.isArray(list) ? list : [];
+  }
+  function addPayment(entry){
+    var list = getPayments();
+    list.unshift({
+      id: 'pay_' + Date.now().toString(36),
+      date: entry.date || new Date().toISOString(),
+      planName: entry.planName || '',
+      amount: entry.amount || 0,
+      cardLast4: entry.cardLast4 || '',
+      method: entry.method || '카드',
+      status: entry.status || '결제완료'
+    });
+    _set(KEY_PAYMENTS, list);
+  }
 
   function getStatus(){
     var sub = getSubscription();
@@ -8704,6 +8741,20 @@ window.MrfAuth = (function(){
       };
     }
     _set(KEY_SUB, sub);
+
+    // 1개월권은 즉시 결제가 발생 → 결제 내역에 기록.
+    // 월간 구독은 3일 무료체험 후 첫 결제가 발생하므로 지금은 기록하지 않음
+    // (실제 Toss 연동 시: 매 결제승인 웹훅마다 addPayment 호출로 교체)
+    if(pendingPlanType === 'once'){
+      addPayment({
+        date: now.toISOString(),
+        planName: 'Pro 1개월 이용권',
+        amount: PRICE_ONCE,
+        cardLast4: card.slice(-4),
+        method: '카드',
+        status: '결제완료'
+      });
+    }
 
     closeModal('authPayment');
 
@@ -9484,6 +9535,8 @@ window.MrfAuth = (function(){
     // state
     getUser: getUser,
     getSubscription: getSubscription,
+    getSubscriptionInfo: getSubscriptionInfo,
+    getPayments: getPayments,
     getStatus: getStatus,
     isPro: isPro,
     isExpired: isExpired,
@@ -10830,20 +10883,60 @@ window.MrfSupport = {
 // ============================================
 window.MrfSubscriptionView = {
   render: function(){
+    this.renderStatus();
+    this.renderHistory();
+  },
+
+  renderStatus: function(){
     var el = document.getElementById('subStatusContent');
     if(!el) return;
     var user = window.MrfAuth && MrfAuth.getUser();
     var status = window.MrfAuth && MrfAuth.getStatus ? MrfAuth.getStatus() : 'none';
+    var info = window.MrfAuth && MrfAuth.getSubscriptionInfo ? MrfAuth.getSubscriptionInfo() : {};
+    var fmt = function(d){ return d ? new Date(d).toLocaleDateString('ko-KR') : ''; };
+
     if(!user){
       el.innerHTML = '<div style="text-align:center;padding:24px"><div style="font-size:36px;margin-bottom:10px">🔐</div><div style="font-size:15px;font-weight:700;color:var(--fg);margin-bottom:8px">로그인이 필요합니다</div><button onclick="MrfAuth.openModal(\'authLogin\')" style="padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer">로그인하기</button></div>';
       return;
     }
-    if(status === 'active'){
-      var info = MrfAuth.getSubscriptionInfo ? MrfAuth.getSubscriptionInfo() : {};
-      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">✨</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">Pro 구독 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">' + (info.plan === 'once' ? '1개월권' : '월정액 자동결제') + ' · ' + (info.expiresAt ? '~' + new Date(info.expiresAt).toLocaleDateString('ko-KR') : '활성') + '</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 해지</button>';
+
+    if(status === 'trial'){
+      var tDays = MrfAuth.getTrialDaysLeft ? MrfAuth.getTrialDaysLeft() : 0;
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🎁</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">무료 체험 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + tDays + '일</b> · ' + fmt(info.trialEnd) + ' 첫 결제 예정</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 관리</button>';
+    } else if(status === 'active'){
+      var pDays = MrfAuth.getPeriodDaysLeft ? MrfAuth.getPeriodDaysLeft() : 0;
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">✨</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">Pro 구독 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">월정액 자동결제 · 이용 잔여 기간: <b style="color:var(--fg)">' + pDays + '일</b> (다음 결제 ' + fmt(info.periodEnd) + ')</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 해지</button>';
+    } else if(status === 'cancelled_active'){
+      var cDays = MrfAuth.getPeriodDaysLeft ? MrfAuth.getPeriodDaysLeft() : 0;
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:var(--surface2,#1a1a2e);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">⏳</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">해지 예정</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + cDays + '일</b> · ' + fmt(info.periodEnd) + '까지 이용 가능</div></div></div><button onclick="MrfAuth.reactivate()" style="width:100%;margin-top:12px;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">구독 재개</button>';
+    } else if(status === 'once'){
+      var oDays = MrfAuth.getPeriodDaysLeft ? MrfAuth.getPeriodDaysLeft() : 0;
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">📅</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">1개월 이용권</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + oDays + '일</b> · ' + fmt(info.periodEnd) + '까지</div></div></div><button onclick="MrfAuth.startSignup()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">월간 구독으로 전환</button>';
+    } else if(status === 'expired'){
+      el.innerHTML = '<div style="text-align:center;padding:24px"><div style="font-size:36px;margin-bottom:10px">🔒</div><div style="font-size:15px;font-weight:700;color:var(--fg);margin-bottom:6px">이용 잔여 기간: 만료됨</div><div style="font-size:13px;color:var(--dim);margin-bottom:16px">활성 구독이 없습니다. 계속 이용하려면 구독을 시작하세요</div><button onclick="MrfAuth.unifiedStart()" style="padding:12px 28px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">✨ 구독 시작하기</button></div>';
     } else {
-      el.innerHTML = '<div style="text-align:center;padding:24px"><div style="font-size:36px;margin-bottom:10px">💫</div><div style="font-size:15px;font-weight:700;color:var(--fg);margin-bottom:8px">아직 구독 중이 아닙니다</div><div style="font-size:13px;color:var(--dim);margin-bottom:16px">월 9,900원으로 급상승 아이템을 무제한 발굴하세요</div><button onclick="MrfAuth.unifiedStart()" style="padding:12px 28px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">🚀 지금 시작하기</button></div>';
+      el.innerHTML = '<div style="text-align:center;padding:24px"><div style="font-size:36px;margin-bottom:10px">💫</div><div style="font-size:15px;font-weight:700;color:var(--fg);margin-bottom:8px">활성 구독이 없습니다</div><div style="font-size:13px;color:var(--dim);margin-bottom:16px">월 9,900원으로 급상승 아이템을 무제한 발굴하세요</div><button onclick="MrfAuth.unifiedStart()" style="padding:12px 28px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">🚀 지금 시작하기</button></div>';
     }
+  },
+
+  renderHistory: function(){
+    var el = document.getElementById('paymentHistoryContent');
+    if(!el) return;
+    var list = window.MrfAuth && MrfAuth.getPayments ? MrfAuth.getPayments() : [];
+    if(!list.length){
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--dim);font-size:13.5px">결제 내역이 없습니다</div>';
+      return;
+    }
+    var rows = list.map(function(p){
+      var d = new Date(p.date);
+      var dateStr = d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)">' +
+        '<div><div style="font-size:13.5px;font-weight:700;color:var(--fg)">' + p.planName + '</div>' +
+        '<div style="font-size:12px;color:var(--dim);margin-top:2px">' + dateStr + ' · ' + p.method + (p.cardLast4 ? ' ****' + p.cardLast4 : '') + '</div></div>' +
+        '<div style="text-align:right"><div style="font-size:13.5px;font-weight:700;color:var(--fg)">' + Number(p.amount).toLocaleString() + '원</div>' +
+        '<div style="font-size:11.5px;color:#22c55e;margin-top:2px">' + p.status + '</div></div></div>';
+    }).join('');
+    el.innerHTML = '<div style="display:flex;flex-direction:column">' + rows + '</div>';
   }
 };
 
