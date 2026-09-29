@@ -5903,7 +5903,7 @@ body.light .hero-pill{
     <div class="auth-head">
       <img class="mrf-logo-sym auth-logo-brand" alt="서치큐브">
       <h2 class="auth-title">3일 무료체험 시작</h2>
-      <p class="auth-sub">이메일 하나만 있으면 됩니다.<br>지금 카드를 등록하고 3일 뒤 자동결제됩니다.</p>
+      <p class="auth-sub">구글 또는 카카오 계정으로 30초 만에 시작하세요.<br>카드 등록 없이 바로 3일간 무료로 이용할 수 있어요.</p>
     </div>
 
     <div class="auth-plan-summary" id="signupPlanSummary">
@@ -5921,45 +5921,29 @@ body.light .hero-pill{
       </div>
     </div>
 
-    <div class="auth-social-wrap">
-      <button class="auth-social-btn auth-social-kakao" onclick="MrfAuth.loginKakaoSignup()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#191919"><path d="M12 3C6.48 3 2 6.48 2 10.8c0 2.76 1.71 5.19 4.3 6.64l-.9 3.36 3.86-2.54C10.05 18.4 11 18.5 12 18.5c5.52 0 10-3.37 10-7.5S17.52 3 12 3z"/></svg>
-        카카오로 계속하기
-      </button>
-      <button class="auth-social-btn auth-social-google" onclick="(function(){ if(window.MrfAuth && MrfAuth.loginGoogleSignup) MrfAuth.loginGoogleSignup(); else { document.getElementById('signupEmail').focus(); if(typeof toast==='function') toast('Google 연동 준비 중이에요. 이메일로 계속해 주세요 😊'); } })()">
-        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
-        Google로 계속하기
-      </button>
-    </div>
-
-    <div class="auth-divider">또는 이메일로 계속</div>
-
-    <div class="auth-field">
-      <label for="signupEmail">이메일 주소</label>
-      <input type="email" id="signupEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
-    </div>
-
-    <div class="auth-field" id="signupPasswordField">
-      <label for="signupPassword">비밀번호 (6자 이상)</label>
-      <input type="password" id="signupPassword" class="auth-input" placeholder="다른 기기에서도 이 비밀번호로 로그인해요" autocomplete="new-password" minlength="6">
-    </div>
-
     <label class="auth-agree">
       <input type="checkbox" id="signupAgree">
       <span>
-        <b>[필수]</b> 만 14세 이상이며, <b id="signupAgreeAmount">9,900원 월간 자동결제</b>와
+        <b>[필수]</b> 만 14세 이상이며,
         <a href="#" onclick="event.preventDefault();alert('이용약관은 실제 서비스 배포 시 추가됩니다.')">이용약관</a> ·
         <a href="#" onclick="event.preventDefault();MrfAuth.openModal('authRefundPolicy')">환불정책</a> ·
         <a href="#" onclick="event.preventDefault();alert('개인정보 수집·이용 동의서는 실제 서비스 배포 시 추가됩니다.')">개인정보 수집·이용</a>에 동의합니다.
       </span>
     </label>
 
-    <button class="auth-btn" id="signupNextBtn" onclick="MrfAuth.goToPayment()" disabled>
-      💳 카드 등록하고 시작하기
-    </button>
+    <div class="auth-social-wrap">
+      <button class="auth-social-btn auth-social-kakao" onclick="MrfAuth._requireAgree('signupAgree') && MrfAuth.loginKakaoSignup()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#191919"><path d="M12 3C6.48 3 2 6.48 2 10.8c0 2.76 1.71 5.19 4.3 6.64l-.9 3.36 3.86-2.54C10.05 18.4 11 18.5 12 18.5c5.52 0 10-3.37 10-7.5S17.52 3 12 3z"/></svg>
+        카카오로 계속하기
+      </button>
+      <button class="auth-social-btn auth-social-google" onclick="MrfAuth._requireAgree('signupAgree') && MrfAuth.loginGoogleSignup()">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Google로 계속하기
+      </button>
+    </div>
 
     <div class="auth-footer-note">
-      신용·체크카드 등록 후 매월 자동결제 (토스페이먼츠)<br>
+      카드 등록은 체험이 끝난 뒤 계속 이용하실 때만 진행됩니다<br>
       언제든지 취소 가능 · 3일 이내 미사용 시 전액 환불
     </div>
   </div>
@@ -6060,7 +6044,7 @@ body.light .hero-pill{
     <div class="auth-head">
       <img class="mrf-logo-sym auth-logo-brand" alt="서치큐브">
       <h2 class="auth-title">로그인</h2>
-      <p class="auth-sub">이메일로 간편하게 로그인하세요.</p>
+      <p class="auth-sub">구글 또는 카카오 계정으로 로그인하세요.</p>
     </div>
 
     <div class="auth-social-wrap">
@@ -6076,71 +6060,9 @@ body.light .hero-pill{
     <!-- GIS renders a real Google Sign-In button here when popup is suppressed -->
     <div id="googleBtnContainer" style="display:none;margin-top:4px"></div>
 
-    <div class="auth-divider">또는 이메일로 로그인</div>
-
-    <div class="auth-field">
-      <label for="loginEmail">이메일 주소</label>
-      <input type="email" id="loginEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
-    </div>
-    <div class="auth-field">
-      <label for="loginPw">비밀번호</label>
-      <input type="password" id="loginPw" class="auth-input" placeholder="비밀번호를 입력하세요" autocomplete="current-password"
-             onkeydown="if(event.key==='Enter') MrfAuth.login()">
-    </div>
-
-    <!-- 아이디·비번 기억하기 -->
-    <div class="auth-remember-row">
-      <label class="auth-remember-label">
-        <input type="checkbox" id="loginRemember" onchange="MrfAuth.toggleRemember(this.checked)">
-        <span class="auth-remember-box"></span>
-        아이디·비밀번호 기억하기
-      </label>
-    </div>
-
-    <button class="auth-btn" onclick="MrfAuth.login()">이메일로 로그인</button>
-
     <div class="auth-footer-note">
       아직 회원이 아니신가요?
-      <a href="#" onclick="event.preventDefault(); MrfAuth.closeModal('authLogin'); MrfAuth.startSignup();" style="color:var(--accent);font-weight:600">3일 무료체험</a>
-      <span style="color:var(--fg-3);margin:0 4px">·</span>
-      <a href="#" onclick="event.preventDefault(); MrfAuth.openFreeSignup();" style="color:var(--fg-2)">무료 회원가입</a>
-    </div>
-  </div>
-</div>
-
-<!-- Free Signup (no payment required) -->
-<div class="auth-overlay" id="authFreeSignup">
-  <div class="auth-modal">
-    <button class="auth-close" onclick="MrfAuth.closeModal('authFreeSignup')">✕</button>
-    <div class="auth-head">
-      <img class="mrf-logo-sym auth-logo-brand" alt="서치큐브">
-      <h2 class="auth-title">무료 회원가입</h2>
-      <p class="auth-sub">이메일 하나로 무료로 시작하세요.<br>Pro 기능은 언제든지 업그레이드 가능합니다.</p>
-    </div>
-    <div class="auth-field">
-      <label for="freeSignupEmail">이메일 주소 <span style="color:#ef4444">*</span></label>
-      <input type="email" id="freeSignupEmail" class="auth-input" placeholder="you@example.com" autocomplete="email"
-             onkeydown="if(event.key==='Enter') MrfAuth.submitFreeSignup()">
-    </div>
-    <div class="auth-field">
-      <label for="freeSignupName">이름 <span style="color:var(--fg-3);font-weight:400;font-size:12px">(선택)</span></label>
-      <input type="text" id="freeSignupName" class="auth-input" placeholder="홍길동" autocomplete="name"
-             onkeydown="if(event.key==='Enter') MrfAuth.submitFreeSignup()">
-    </div>
-    <label class="auth-agree" style="margin-top:4px">
-      <input type="checkbox" id="freeSignupAgree">
-      <span>
-        <b>[필수]</b>
-        <a href="#" onclick="event.preventDefault();alert('이용약관은 실제 서비스 배포 시 추가됩니다.')">이용약관</a> ·
-        <a href="#" onclick="event.preventDefault();alert('개인정보 수집·이용 동의서는 실제 서비스 배포 시 추가됩니다.')">개인정보 수집·이용</a>에 동의합니다.
-      </span>
-    </label>
-    <button class="auth-btn" onclick="MrfAuth.submitFreeSignup()" style="margin-top:16px">무료로 시작하기 →</button>
-    <div class="auth-footer-note" style="text-align:center;margin-top:12px">
-      Pro 기능을 모두 쓰고 싶다면
-      <a href="#" onclick="event.preventDefault(); MrfAuth.closeModal('authFreeSignup'); MrfAuth.startSignup();" style="color:var(--accent);font-weight:600">3일 무료체험</a>
-      · 이미 회원이신가요?
-      <a href="#" onclick="event.preventDefault(); MrfAuth.closeModal('authFreeSignup'); MrfAuth.openModal('authLogin');" style="color:var(--accent);font-weight:600">로그인</a>
+      <a href="#" onclick="event.preventDefault(); MrfAuth.closeModal('authLogin'); MrfAuth.startSignup();" style="color:var(--accent);font-weight:600">3일 무료체험 시작하기</a>
     </div>
   </div>
 </div>
@@ -8661,15 +8583,13 @@ window.MrfAuth = (function(){
   function openModal(id){
     var el = document.getElementById(id);
     if(el) el.classList.add('show');
-    // 로그인 모달 열릴 때 기억된 정보 자동 채우기
-    if(id === 'authLogin') setTimeout(fillRemembered, 60);
   }
   function closeModal(id){
     var el = document.getElementById(id);
     if(el) el.classList.remove('show');
   }
   function closeAll(){
-    ['authSignup','authPayment','authSuccess','authLogin','authCancel','authRefundPolicy','authFreeSignup'].forEach(closeModal);
+    ['authSignup','authPayment','authSuccess','authLogin','authCancel','authRefundPolicy'].forEach(closeModal);
   }
 
   // ---------- Signup flow ----------
@@ -8695,25 +8615,16 @@ window.MrfAuth = (function(){
     if($('signupFirstBillDate')) $('signupFirstBillDate').textContent = _fmtDate(billDate);
     if($('signupAgreeAmount')) $('signupAgreeAmount').textContent = agreeAmount;
 
-    // Wire up validation
-    var email = $('signupEmail');
-    var pwField = $('signupPasswordField');
-    var pw = $('signupPassword');
-    var agree = $('signupAgree');
-    var btn = $('signupNextBtn');
-    if(pwField) pwField.style.display = pendingIsOAuth ? 'none' : '';
-    function validate(){
-      var okEmail = email.value.indexOf('@') > 0 && email.value.indexOf('.') > 0;
-      var okPw = pendingIsOAuth || (pw && pw.value.length >= 6);
-      btn.disabled = !(okEmail && okPw && agree.checked);
-    }
-    email.oninput = validate;
-    if(pw) pw.oninput = validate;
-    agree.onchange = validate;
-    validate();
-
     openModal('authSignup');
-    setTimeout(function(){ email.focus(); }, 100);
+  }
+
+  // Shared guard for the social buttons on the signup modal — require the
+  // terms checkbox before starting Google/Kakao auth. Returns true/false so
+  // it can be used as `MrfAuth._requireAgree('signupAgree') && MrfAuth.loginX()`.
+  function _requireAgree(checkboxId){
+    var el = document.getElementById(checkboxId);
+    if(el && !el.checked){ alert('약관에 동의해주세요.'); return false; }
+    return true;
   }
 
   function _preparePaymentModal(email){
@@ -8745,23 +8656,6 @@ window.MrfAuth = (function(){
     setTimeout(function(){ cardNum.focus(); }, 100);
   }
 
-  function goToPayment(){
-    var email = document.getElementById('signupEmail').value.trim();
-    if(!email || email.indexOf('@') < 0) { alert('이메일을 확인해주세요.'); return; }
-    if(!document.getElementById('signupAgree').checked){ alert('약관에 동의해주세요.'); return; }
-    var pwEl = document.getElementById('signupPassword');
-    if(!pendingIsOAuth){
-      if(!pwEl || pwEl.value.length < 6){ alert('비밀번호를 6자 이상 입력해주세요. 다른 기기에서 로그인할 때 필요해요.'); return; }
-      pendingPassword = pwEl.value;
-    } else {
-      pendingPassword = '';
-    }
-
-    pendingEmail = email;
-    closeModal('authSignup');
-    _preparePaymentModal(email);
-  }
-
   function submitPayment(){
     // Demo: accept any input, don't actually process a real charge — this
     // just registers the plan. (Real card data is never sent anywhere; the
@@ -8775,17 +8669,19 @@ window.MrfAuth = (function(){
     var btn = document.querySelector('#authPayment .auth-btn');
     if(btn){ btn.disabled = true; btn.textContent = '처리 중...'; }
 
-    // Already have a server session (existing logged-in user starting/renewing
-    // a plan, e.g. after trial expired, or an OAuth user with no plan yet) →
-    // just tell the server to start the plan on their existing account.
-    // Otherwise this is a brand-new email+password account.
-    var request = _token()
-      ? _api('/api/subscription', { body: { action: 'start', planType: pendingPlanType, cardLast4: cardLast4 } })
-      : _api('/api/auth/signup', { body: { email: pendingEmail, password: pendingPassword, planType: pendingPlanType, cardLast4: cardLast4 } });
+    // Accounts are Google/Kakao only now — the user is always already logged
+    // in (via social auth) by the time they reach card registration, so this
+    // just tells the server to start/renew the plan on their existing account.
+    if(!_token()){
+      alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
+      if(btn){ btn.disabled = false; btn.textContent = '✨ 3일 무료로 시작하기'; }
+      closeModal('authPayment');
+      openModal('authLogin');
+      return;
+    }
 
-    request.then(function(data){
+    _api('/api/subscription', { body: { action: 'start', planType: pendingPlanType, cardLast4: cardLast4 } }).then(function(data){
       _applyServerState(data);
-      pendingPassword = ''; // never keep this around longer than needed
       var sub = data.subscription;
 
       closeModal('authPayment');
@@ -8807,8 +8703,8 @@ window.MrfAuth = (function(){
       openModal('authSuccess');
       updateAllUI();
     }).catch(function(err){
-      if(err.status === 409){
-        alert('이미 가입된 이메일입니다. 로그인해주세요.');
+      if(err.status === 401){
+        alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
         closeModal('authPayment');
         openModal('authLogin');
       } else {
@@ -8819,78 +8715,10 @@ window.MrfAuth = (function(){
     });
   }
 
-  // ---------- Login (server-verified) ----------
-  // NOTE: there is no master password here anymore — it lives only as an
-  // encrypted environment variable on the Cloudflare Pages project and is
-  // checked inside /functions/api/auth/login.js, server-side. This client
-  // bundle is public (view-source), so nothing that must stay secret can
-  // live here.
-  var KEY_REMEMBER = 'sc_remember_v1';
-
-  // 기억하기: 저장된 정보 자동 채우기
-  function fillRemembered(){
-    try {
-      var saved = JSON.parse(localStorage.getItem(KEY_REMEMBER) || 'null');
-      if(!saved) return;
-      var eEl = document.getElementById('loginEmail');
-      var cEl = document.getElementById('loginRemember');
-      if(eEl) eEl.value = saved.email || '';
-      if(cEl) cEl.checked = true;
-    } catch(e){}
-  }
-
-  function toggleRemember(on){
-    if(!on){ try{ localStorage.removeItem(KEY_REMEMBER); }catch(e){} }
-  }
-
-  function login(){
-    var email = (document.getElementById('loginEmail').value || '').trim().toLowerCase();
-    var pw    = (document.getElementById('loginPw').value   || '').trim();
-    var remember = document.getElementById('loginRemember') && document.getElementById('loginRemember').checked;
-
-    if(!email || email.indexOf('@') < 0){ alert('이메일을 확인해주세요.'); return; }
-    if(!pw){ alert('비밀번호를 입력해주세요.'); return; }
-
-    // 기억하기 저장 (이메일만 — 비밀번호는 더 이상 브라우저에 저장하지 않습니다)
-    if(remember){
-      try{ localStorage.setItem(KEY_REMEMBER, JSON.stringify({ email: email })); }catch(e){}
-    } else {
-      try{ localStorage.removeItem(KEY_REMEMBER); }catch(e){}
-    }
-
-    var btn = document.querySelector('#authLogin .auth-btn');
-    if(btn){ btn.disabled = true; }
-
-    _api('/api/auth/login', { body: { email: email, password: pw } }).then(function(data){
-      _applyServerState(data);
-      closeModal('authLogin');
-      updateAllUI();
-      setTimeout(function(){
-        MrfRouter && MrfRouter.go('app');
-        if(typeof toast === 'function'){
-          toast(data.user && data.user.master ? '마스터 계정으로 로그인됐어요 👑 모든 기능이 활성화됐습니다.' : '로그인됐어요 👋');
-        }
-      }, 100);
-    }).catch(function(err){
-      if(err.status === 404){
-        // No server account under this email — offer to start a trial instead
-        if(confirm('가입된 계정을 찾을 수 없습니다.\n\n아직 가입 전이라면 무료체험을 시작해 주세요.\n\n무료체험 시작 화면으로 이동할까요?')){
-          closeModal('authLogin');
-          startSignup();
-          setTimeout(function(){
-            var em = document.getElementById('signupEmail');
-            if(em){ em.value = email; em.dispatchEvent(new Event('input',{bubbles:true})); }
-          }, 250);
-        }
-      } else if(err.status === 429){
-        alert(err.message);
-      } else {
-        alert(err.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
-      }
-    }).finally(function(){
-      if(btn){ btn.disabled = false; }
-    });
-  }
+  // ---------- Login ----------
+  // Accounts are Google/Kakao only — there is no email+password login or
+  // signup anymore, and no master account either (removed entirely, both
+  // client and server side). See loginGoogle()/loginKakao() below.
 
   // ---------- Social Login ----------
   // Google OAuth via Google Identity Services (GIS)
@@ -8916,7 +8744,7 @@ window.MrfAuth = (function(){
   // re-verifies the token with Google and is the one that decides the email.
   function _handleGoogleUser(userInfo, tokenPayload){
     if(!tokenPayload || (!tokenPayload.accessToken && !tokenPayload.idToken)){
-      if(typeof toast==='function') toast('Google 로그인 오류 — 이메일로 로그인해 주세요.');
+      if(typeof toast==='function') toast('Google 로그인 오류가 발생했습니다. 다시 시도해 주세요.');
       return;
     }
     _api('/api/auth/oauth', { body: { provider: 'google', accessToken: tokenPayload.accessToken, idToken: tokenPayload.idToken } }).then(function(data){
@@ -8953,19 +8781,13 @@ window.MrfAuth = (function(){
       });
       client.requestAccessToken({ prompt: 'select_account' });
     } catch(e){
-      if(typeof toast==='function') toast('Google 로그인 오류 — 이메일로 로그인해 주세요.');
+      if(typeof toast==='function') toast('Google 로그인 오류가 발생했습니다. 다시 시도해 주세요.');
     }
   }
 
   function loginGoogle(){
     if(!GOOGLE_CLIENT_ID){
-      closeModal('authLogin');
-      setTimeout(function(){
-        startSignup();
-        setTimeout(function(){
-          if(typeof toast==='function') toast('Google 소셜 로그인은 준비 중이에요. 이메일로 시작해 주세요 😊');
-        }, 400);
-      }, 150);
+      if(typeof toast==='function') toast('Google 로그인은 현재 이용할 수 없습니다. 카카오로 시도해 주세요.');
       return;
     }
     // GIS is pre-loaded at init — call immediately to preserve user gesture for popup
@@ -9022,43 +8844,29 @@ window.MrfAuth = (function(){
       cb();
     };
     s.onerror = function(){
-      if(typeof toast==='function') toast('카카오 연결에 실패했습니다. 이메일로 로그인해 주세요.');
+      if(typeof toast==='function') toast('카카오 연결에 실패했습니다. 잠시 후 다시 시도해 주세요.');
     };
     document.head.appendChild(s);
   }
 
   // The server independently re-verifies accessToken with Kakao's own API and
   // decides the real email — kakaoUser here is only used for a display name.
+  // Brand-new accounts already get their 3-day trial from the server
+  // (functions/api/auth/oauth.js), so this always just logs the user in —
+  // no card is collected at signup time (that happens later, when the trial
+  // ends and they choose to continue, via unifiedStart()/submitPayment()).
   function _handleKakaoUser(kakaoUser, accessToken){
-    var profile = ((kakaoUser && kakaoUser.kakao_account) || {}).profile || {};
-    var name = profile.nickname || '';
-
     _api('/api/auth/oauth', { body: { provider: 'kakao', accessToken: accessToken } }).then(function(data){
       _applyServerState(data);
-      if(data.subscription){
-        // Returning user who already has a plan — just log them in
-        closeModal('authLogin');
-        closeModal('authSignup');
-        updateAllUI();
-        setTimeout(function(){
-          if(window.MrfRouter) MrfRouter.go('app');
-          if(typeof toast==='function') toast('카카오 계정으로 로그인됐어요 ✅');
-        }, 200);
-      } else {
-        // No plan yet (brand-new, or returning without ever subscribing) —
-        // still need a card on file to start the trial, same as email signup.
-        pendingEmail = data.user.email;
-        pendingIsOAuth = true;
-        closeModal('authLogin');
-        startSignup(undefined, true);
-        setTimeout(function(){
-          var em = document.getElementById('signupEmail');
-          if(em){ em.value = data.user.email; em.dispatchEvent(new Event('input',{bubbles:true})); }
-          if(name && document.getElementById('signupName')) document.getElementById('signupName').value = name;
-        }, 250);
-      }
+      closeModal('authLogin');
+      closeModal('authSignup');
+      updateAllUI();
+      setTimeout(function(){
+        if(window.MrfRouter) MrfRouter.go('app');
+        if(typeof toast==='function') toast(data.isNew ? '카카오 계정으로 가입됐어요 🎉' : '카카오 계정으로 로그인됐어요 ✅');
+      }, 200);
     }).catch(function(err){
-      if(typeof toast==='function') toast(err.message || '카카오 인증에 실패했습니다. 이메일로 로그인해 주세요.');
+      if(typeof toast==='function') toast(err.message || '카카오 인증에 실패했습니다.');
     });
   }
 
@@ -9069,19 +8877,13 @@ window.MrfAuth = (function(){
     .then(function(r){ return r.json(); })
     .then(function(res){ _handleKakaoUser(res, token); })
     .catch(function(){
-      if(typeof toast==='function') toast('카카오 정보를 불러올 수 없습니다. 이메일로 로그인해 주세요.');
+      if(typeof toast==='function') toast('카카오 정보를 불러올 수 없습니다. 다시 시도해 주세요.');
     });
   }
 
   function loginKakao(){
     if(!KAKAO_APP_KEY){
-      closeModal('authLogin');
-      setTimeout(function(){
-        startSignup();
-        setTimeout(function(){
-          if(typeof toast==='function') toast('카카오 연동은 준비 중이에요. 이메일로 시작해 주세요 😊');
-        }, 400);
-      }, 150);
+      if(typeof toast==='function') toast('카카오 로그인은 현재 이용할 수 없습니다. Google로 시도해 주세요.');
       return;
     }
     // Manual popup OAuth — response_type=token (implicit flow)
@@ -9140,30 +8942,6 @@ window.MrfAuth = (function(){
     }, 150);
   }
 
-  // ---------- Free Signup (no payment) ----------
-  function openFreeSignup(){
-    closeAll();
-    openModal('authFreeSignup');
-  }
-
-  function submitFreeSignup(){
-    var email = (document.getElementById('freeSignupEmail').value || '').trim().toLowerCase();
-    var name  = (document.getElementById('freeSignupName').value  || '').trim();
-    var agree = document.getElementById('freeSignupAgree') && document.getElementById('freeSignupAgree').checked;
-
-    if(!email || email.indexOf('@') < 0){ alert('올바른 이메일을 입력해주세요.'); return; }
-    if(!agree){ alert('이용약관에 동의해주세요.'); return; }
-
-    var user = { email: email, name: name, signupDate: new Date().toISOString(), plan: 'free' };
-    _set(KEY_USER, user);
-
-    closeModal('authFreeSignup');
-    updateAllUI();
-    setTimeout(function(){
-      if(window.MrfRouter) MrfRouter.go('app');
-      if(typeof toast==='function') toast('환영합니다! 무료 계정으로 시작했어요 🎉 Pro 기능은 업그레이드 후 이용 가능합니다.');
-    }, 200);
-  }
 
   // ---------- Logout ----------
   function logout(){
@@ -9173,7 +8951,6 @@ window.MrfAuth = (function(){
     _del(KEY_SUB);
     _del(KEY_PAYMENTS);
     _setToken(null);
-    try{ localStorage.removeItem(KEY_REMEMBER); }catch(e){}
     updateAllUI();
     if(window.MrfRouter) MrfRouter.go('landing');
     setTimeout(function(){ if(typeof toast==='function') toast('로그아웃됐습니다.'); }, 200);
@@ -9590,10 +9367,8 @@ window.MrfAuth = (function(){
     getPeriodDaysLeft: getPeriodDaysLeft,
     // flows
     startSignup: startSignup,
-    goToPayment: goToPayment,
     submitPayment: submitPayment,
-    login: login,
-    toggleRemember: toggleRemember,
+    _requireAgree: _requireAgree,
     loginKakao: loginKakao,
     loginKakaoSignup: function(){
       // Called from signup modal — same as loginKakao but routes to signup after auth
@@ -9605,8 +9380,6 @@ window.MrfAuth = (function(){
       loginGoogle();
     },
     loginApple: loginApple,
-    openFreeSignup: openFreeSignup,
-    submitFreeSignup: submitFreeSignup,
     logout: logout,
     startCancel: startCancel,
     confirmCancel: confirmCancel,
