@@ -7,7 +7,8 @@
 // exploit).
 import {
   json, bad, getBearerToken, getSession, userKey, kvGetJSON, kvPutJSON,
-  buildSubscription, makePaymentEntry, PRICE_ONCE, checkRateLimit
+  buildSubscription, makePaymentEntry, PRICE_ONCE, checkRateLimit,
+  isAdminEmail, buildAdminSubscription
 } from '../_shared/lib.js';
 
 export async function onRequestPost({ request, env }) {
@@ -28,6 +29,14 @@ export async function onRequestPost({ request, env }) {
   const key = userKey(session.email);
   const user = await kvGetJSON(kv, key);
   if (!user) return bad('계정을 찾을 수 없습니다.', 404);
+
+  // The admin account's unlimited access can't be changed through this
+  // endpoint (no cancelling, no downgrading) — it's always kept active.
+  if (isAdminEmail(env, user.email)) {
+    user.subscription = buildAdminSubscription();
+    await kvPutJSON(kv, key, user);
+    return json({ subscription: user.subscription, payments: user.payments || [] });
+  }
 
   const action = body.action;
   const sub = user.subscription;
