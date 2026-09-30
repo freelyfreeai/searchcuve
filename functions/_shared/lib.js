@@ -33,7 +33,7 @@ export function randomHex(nBytes) {
   return bufToHex(arr.buffer);
 }
 
-// PBKDF2-HMAC-SHA256, 100000 iterations, 256-bit output — matches Node's
+// PBKDF2-HMAC-SHA256, 100000 iterations, 256-bit output â matches Node's
 // crypto.pbkdf2Sync(password, Buffer.from(saltHex,'hex'), 100000, 32, 'sha256')
 export async function pbkdf2Hex(password, saltHex) {
   const enc = new TextEncoder();
@@ -117,7 +117,7 @@ function addDays(date, days) {
 }
 
 // Builds a brand-new subscription object for a plan purchase.
-// `trialUsed` — if true and planType is monthly, skip the free trial and
+// `trialUsed` â if true and planType is monthly, skip the free trial and
 // charge immediately (prevents unlimited trial resets once localStorage is
 // no longer the source of truth).
 export function buildSubscription(planType, opts) {
@@ -159,6 +159,35 @@ export function buildSubscription(planType, opts) {
   };
 }
 
+// ---------- Admin (unlimited-use) account ----------
+// A single admin account (identified by verified OAuth email, never a
+// separate password) always has unlimited access. Configure the email via
+// the ADMIN_EMAIL Cloudflare env var; falls back to the owner's own address
+// if that var isn't set.
+export function isAdminEmail(env, email) {
+  const admin = String((env && env.ADMIN_EMAIL) || 'freelyfree@gmail.com').toLowerCase().trim();
+  return String(email || '').toLowerCase().trim() === admin;
+}
+
+// A permanent, always-active subscription (far-future period end) for the
+// admin account. Re-applied on every login/session check so the admin
+// account can never drift into 'expired'/'trial'/'cancelled' no matter what
+// happens to it.
+export function buildAdminSubscription() {
+  const now = new Date();
+  const far = new Date(now);
+  far.setFullYear(far.getFullYear() + 100);
+  return {
+    status: 'active',
+    plan: 'admin',
+    startDate: now.toISOString(),
+    periodStart: now.toISOString(),
+    periodEnd: far.toISOString(),
+    cardLast4: '',
+    amount: 0
+  };
+}
+
 export function makePaymentEntry(entry) {
   return {
     id: 'pay_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8),
@@ -166,7 +195,7 @@ export function makePaymentEntry(entry) {
     planName: entry.planName || '',
     amount: entry.amount || 0,
     cardLast4: entry.cardLast4 || '',
-    method: entry.method || '카드',
-    status: entry.status || '결제완료'
+    method: entry.method || 'ì¹´ë',
+    status: entry.status || 'ê²°ì ìë£'
   };
 }
