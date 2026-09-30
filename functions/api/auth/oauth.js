@@ -90,6 +90,16 @@ export async function onRequestPost({ request, env }) {
       user.subscription = buildAdminSubscription();
       await kvPutJSON(kv, key, user);
     }
+  } else if (!user.subscription) {
+    // Heal accounts created while this endpoint had the old bug (before the
+    // trial-grant fix above) — they were left with subscription: null,
+    // which made their status permanently resolve to 'none' and re-show
+    // the signup wall on every search, forever, even after logging back
+    // in. Grant the trial they should have gotten originally (or skip
+    // straight to active if they'd already used their trial elsewhere).
+    user.subscription = buildSubscription('monthly', { trialUsed: !!user.trialUsed });
+    user.trialUsed = true;
+    await kvPutJSON(kv, key, user);
   }
 
   const token = await createSession(kv, identity.email);
