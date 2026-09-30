@@ -1,6 +1,6 @@
 // GET /api/session — refresh the client's cached user/subscription/payments
 // from the server on page load, using the bearer session token.
-import { json, bad, getBearerToken, getSession, userKey, kvGetJSON, kvPutJSON, isAdminEmail, buildAdminSubscription } from '../_shared/lib.js';
+import { json, bad, getBearerToken, getSession, userKey, kvGetJSON, kvPutJSON, isAdminEmail, buildAdminSubscription, buildSubscription } from '../_shared/lib.js';
 
 export async function onRequestGet({ request, env }) {
   const kv = env.SC_KV;
@@ -24,6 +24,16 @@ export async function onRequestGet({ request, env }) {
       user.subscription = buildAdminSubscription();
       await kvPutJSON(kv, key, user);
     }
+  } else if (!user.subscription) {
+    // Heal accounts stuck with subscription: null from before the OAuth
+    // trial-grant fix — without this, a user who's already logged in (and
+    // so never hits /api/auth/oauth again) would see the signup wall
+    // re-triggered on every search, forever, since their cached status
+    // permanently resolves to 'none'. Grant the trial they should have
+    // gotten originally the next time their session refreshes here.
+    user.subscription = buildSubscription('monthly', { trialUsed: !!user.trialUsed });
+    user.trialUsed = true;
+    await kvPutJSON(kv, key, user);
   }
 
   return json({
