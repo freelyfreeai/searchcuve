@@ -1,7 +1,7 @@
 // POST /api/auth/oauth — verifies a Google/Kakao access token *server-side*
 // (never trusts the client's claimed email) and gets-or-creates the matching
 // account, so social-login users also get a durable, cross-device account.
-import { json, bad, userKey, kvGetJSON, kvPutJSON, createSession, checkRateLimit, buildSubscription } from '../../_shared/lib.js';
+import { json, bad, userKey, kvGetJSON, kvPutJSON, createSession, checkRateLimit, buildSubscription, isAdminEmail, buildAdminSubscription } from '../../_shared/lib.js';
 
 // Accepts either an OAuth2 access_token (implicit-flow popup) or an id_token
 // (GIS one-tap JWT credential) — the client sends whichever it has.
@@ -60,22 +60,36 @@ export async function onRequestPost({ request, env }) {
   const key = userKey(identity.email);
   let user = await kvGetJSON(kv, key);
   const isNew = !user;
+  const isAdmin = isAdminEmail(env, identity.email);
   if (!user) {
     // New social-login accounts get the same 3-day free trial as
     // email/password signups (functions/api/auth/signup.js) — previously
     // this left subscription: null, which made a brand-new Google/Kakao
     // user's status resolve to 'none' and immediately hit the signup wall
-    // instead of getting their trial.
+    // instead of getting their trial. The one admin account (ADMIN_EMAIL
+    // env var, defaults to the owner's own address) gets unlimited access
+    // instead of the trial.
     user = {
       email: identity.email,
       name: identity.name || '',
       provider: provider,
       createdAt: new Date().toISOString(),
-      subscription: buildSubscription('monthly', {}),
+      subscription: isAdmin ? buildAdminSubscription() : buildSubscription('monthly', {}),
       trialUsed: true,
       payments: []
     };
     await kvPutJSON(kv, key, user);
+  } else if (isAdmin) {
+    // Re-apply the admin's unlimited subscription on every login so the
+    // account can never drift into an expired/trial/cancelled state,
+    // regardless of what happened to it in the past.
+    const sub = user.subscription;
+    const alreadyUnlimited = sub && sub.plan === 'admin' && sub.status === 'active'
+      && new Date(sub.periodEnd).getTime() - Date.now() > 1000 * 60 * 60 * 24 * 365 * 10;
+    if (!alreadyUnlimited) {
+      user.subscription = buildAdminSubscription();
+      await kvPutJSON(kv, key, user);
+    }
   }
 
   const token = await createSession(kv, identity.email);
