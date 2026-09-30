@@ -33,7 +33,7 @@ export function randomHex(nBytes) {
   return bufToHex(arr.buffer);
 }
 
-// PBKDF2-HMAC-SHA256, 100000 iterations, 256-bit output â matches Node's
+// PBKDF2-HMAC-SHA256, 100000 iterations, 256-bit output — matches Node's
 // crypto.pbkdf2Sync(password, Buffer.from(saltHex,'hex'), 100000, 32, 'sha256')
 export async function pbkdf2Hex(password, saltHex) {
   const enc = new TextEncoder();
@@ -117,7 +117,7 @@ function addDays(date, days) {
 }
 
 // Builds a brand-new subscription object for a plan purchase.
-// `trialUsed` â if true and planType is monthly, skip the free trial and
+// `trialUsed` — if true and planType is monthly, skip the free trial and
 // charge immediately (prevents unlimited trial resets once localStorage is
 // no longer the source of truth).
 export function buildSubscription(planType, opts) {
@@ -195,7 +195,7 @@ export function makePaymentEntry(entry) {
     planName: entry.planName || '',
     amount: entry.amount || 0,
     cardLast4: entry.cardLast4 || '',
-    method: entry.method || 'ì¹´ë',
-    status: entry.status || 'ê²°ì ìë£'
+    method: entry.method || '카드',
+    status: entry.status || '결제완료'
   };
 }
