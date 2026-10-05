@@ -4938,9 +4938,9 @@ body.light .hero-pill{
           <div style="margin-top:10px;display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--dim)">
             <span>사용 모델:</span>
             <select id="gmodel" style="max-width:220px;padding:8px 12px;font-size:12.5px">
-              <option value="gemini-2.5-flash" selected>gemini-2.5-flash (빠름·저렴)</option>
-              <option value="gemini-2.5-pro">gemini-2.5-pro (정확·비쌈)</option>
-              <option value="gemini-2.0-flash">gemini-2.0-flash (구버전)</option>
+              <option value="gemini-3.8-flash" selected>gemini-3.8-flash (최신·권장)</option>
+              <option value="gemini-2.5-pro">gemini-2.5-pro (구버전)</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash (종료 예정)</option>
             </select>
             <span style="color:var(--dimmer);font-size:11.5px">※ 오류 나면 모델 바꿔보세요</span>
           </div>
@@ -6637,7 +6637,7 @@ function updateKeyStatus(){
     notice.style.display = hasYt ? 'none' : 'flex';
   }
 }
-safeLS(()=>{const a=localStorage.getItem('yt_key');if(a)$('ytkey').value=a;const b=localStorage.getItem('gm_key');if(b)$('gmkey').value=b;const m=localStorage.getItem('gm_model');if(m)$('gmodel').value=m;});
+safeLS(()=>{const a=localStorage.getItem('yt_key');if(a)$('ytkey').value=a;const b=localStorage.getItem('gm_key');if(b)$('gmkey').value=b;let m=localStorage.getItem('gm_model');if(m==='gemini-2.5-flash'||m==='gemini-2.0-flash'||m==='gemini-2.0-flash-exp'){m='gemini-3.8-flash';localStorage.setItem('gm_model',m);}if(m)$('gmodel').value=m;});
 updateKeyStatus();
 $('saveYt').onclick=()=>{safeLS(()=>localStorage.setItem('yt_key',$('ytkey').value.trim()));toast('✓ 유튜브 키 저장 완료');updateKeyStatus();};
 $('saveGm').onclick=()=>{safeLS(()=>{localStorage.setItem('gm_key',$('gmkey').value.trim());localStorage.setItem('gm_model',$('gmodel').value);});toast('✓ Gemini 키 저장 완료');updateKeyStatus();};
@@ -6680,7 +6680,7 @@ const GUIDES = {
       '프로젝트를 새로 만들 것인지 묻는 팝업이 뜨면 <b>"Create API key in new project"</b> 선택.',
       '생성된 <b>API 키를 복사</b> (자물쇠 아이콘 오른쪽의 복사 버튼).',
       '위의 Gemini 키 칸에 붙여넣고 <b>저장</b> 누르기.',
-      '(선택) 모델을 <b>gemini-2.5-flash</b>로 두면 빠르고 저렴합니다. 더 정확한 분석이 필요하면 gemini-2.5-pro로 바꾸세요.'
+      '(선택) 모델은 기본값 <b>gemini-3.8-flash</b>로 두면 빠르고 저렴합니다.'
     ],
     tip: '💡 <b>왜 필수인가요?</b> Gemini가 실제로 유튜브 영상을 보고 제품·브랜드·원본을 찾아냅니다. 이게 서치큐브의 핵심 차별점입니다.',
     warn: '⚠️ Gemini 모델명은 수시로 업데이트됩니다. 오류가 나면 위의 사용 모델 드롭다운에서 다른 버전으로 바꿔보세요.'
@@ -6733,10 +6733,22 @@ function cleanTitle(t){return t.replace(/#\S+/g,'').replace(/[\[\]\(\)|]/g,' ').
 
 // ---------- Gemini helper ----------
 function gmReady(){return $('gmkey').value.trim().length>0;}
+// 모델별 사고(thinking) 설정: 2.5는 thinkingBudget, 3.x는 thinkingLevel
+function gmThinking(model){
+  if(/2\.5/.test(model))return {thinkingBudget:/pro/.test(model)?128:0};
+  if(/gemini-3/.test(model))return {thinkingLevel:'low'};
+  return null;
+}
+// Gemini API 오류 → 사용자 안내 문구
+function gmErrMsg(j,r){
+  const m=(j&&j.error&&j.error.message)||('HTTP '+(r&&r.status));
+  if(/no longer available|models\/\S+ (is )?not found|is not supported/i.test(m))return '선택한 Gemini 모델이 종료됐어요. 위 "사용 모델"에서 gemini-3.8-flash를 선택하고 저장해주세요.';
+  return m;
+}
 async function gemini(parts,json){
   const key=$('gmkey').value.trim();const model=$('gmodel').value;
   if(!key)throw new Error('Gemini 키가 필요합니다');
-  const is25=/2\.5/.test(model);const lowThink=/pro/.test(model)?128:0;
+  const think=gmThinking(model);
   const body={contents:[{parts}],generationConfig:{maxOutputTokens:8192}};
   if(json)body.generationConfig.responseMimeType="application/json";
   let last='EMPTY';
@@ -6744,12 +6756,12 @@ async function gemini(parts,json){
     const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
       {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const j=await r.json();
-    if(j.error)throw new Error(j.error.message||('HTTP '+r.status));
+    if(j.error)throw new Error(gmErrMsg(j,r));
     const cand=j.candidates&&j.candidates[0];
     const txt=((cand&&cand.content&&cand.content.parts)||[]).map(p=>p.text||'').join('').trim();
     if(txt)return txt;
     last=(cand&&cand.finishReason)||'EMPTY';
-    if(is25)body.generationConfig.thinkingConfig={thinkingBudget:lowThink};
+    if(think)body.generationConfig.thinkingConfig=think;
     await new Promise(s=>setTimeout(s,600*(i+1)));
   }
   throw new Error('응답이 비었어요('+last+'). 다시 시도하거나 모델을 바꿔보세요.');
@@ -6765,22 +6777,22 @@ function parseArr(t){try{return JSON.parse(t);}catch(e){}const m=t.match(/\[[\s\
 async function geminiRaw(contents,useTools){
   const key=$('gmkey').value.trim();const model=$('gmodel').value;
   if(!key)throw new Error('Gemini 키가 필요합니다');
-  const is25=/2\.5/.test(model);const lowThink=/pro/.test(model)?128:0;
+  const think=gmThinking(model);
   const body={contents,generationConfig:{maxOutputTokens:16384}};
-  if(useTools){body.tools=[{google_search:{}}];if(is25)body.generationConfig.thinkingConfig={thinkingBudget:lowThink};}
+  if(useTools){body.tools=[{google_search:{}}];if(think)body.generationConfig.thinkingConfig=think;}
   let last='EMPTY';
   for(let i=0;i<3;i++){
     const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const j=await r.json();
-    if(j.error)throw new Error(j.error.message||('HTTP '+r.status));
+    if(j.error)throw new Error(gmErrMsg(j,r));
     const cand=j.candidates&&j.candidates[0];
     const txt=((cand&&cand.content&&cand.content.parts)||[]).map(p=>p.text||'').join('').trim();
     if(txt)return txt;
     last=(cand&&cand.finishReason)||'EMPTY';
-    if(is25)body.generationConfig.thinkingConfig={thinkingBudget:lowThink}; // 빈응답 시 사고 끄고 재시도
+    if(think)body.generationConfig.thinkingConfig=think; // 빈응답 시 사고 최소화 후 재시도
     await new Promise(s=>setTimeout(s,700*(i+1)));
   }
-  throw new Error('응답이 계속 비어요('+last+'). 모델을 gemini-2.5-pro 또는 gemini-2.0-flash로 바꿔보세요.');
+  throw new Error('응답이 계속 비어요('+last+'). 모델을 바꿔보세요.');
 }
 function mdLite(t){let s=esc(t);s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank">$1</a>');s=s.replace(/(^|[^"'>=])(https?:\/\/[^\s<]+)/g,'$1<a href="$2" target="_blank">$2</a>');s=s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');return s.replace(/\n/g,'<br>');}
 let chatHist=[],CURCHAT=null;
@@ -8171,7 +8183,7 @@ async function geminiVideoGrounded(prompt,id){
   if(!key)throw new Error('Gemini 키가 필요합니다');
   const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
     {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt},vidPart(id)]}],tools:[{google_search:{}}]})});
-  const j=await r.json();if(j.error)throw new Error(j.error.message);
+  const j=await r.json();if(j.error)throw new Error(gmErrMsg(j,r));
   return (j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').trim();
 }
 
@@ -10382,7 +10394,7 @@ window.MrfBatch = (function(){
     if(!gmKey) return null;
 
     try {
-      var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + gmKey;
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (localStorage.getItem('gm_model')||'gemini-3.8-flash') + ':generateContent?key=' + gmKey;
       var prompt = '다음 유튜브 쇼츠 영상에서 소개·추천된 모든 제품을 JSON 배열로만 답해 (설명·마크다운·코드블록 금지).\n\n' +
         '형식: [{"product":"제품명","brand":"브랜드명","category":"카테고리","coupangQuery":"쿠팡 검색 최적화 한국어 키워드","confidence":"high/medium/low"}]\n' +
         '제품이 없으면 [] 로만 답해. 쿠팡에서 검색 불가한 제품(명품 브랜드·해외직구 전용·방송 콘텐츠)은 coupangQuery를 null로 설정해.\n\n' +
@@ -10393,7 +10405,7 @@ window.MrfBatch = (function(){
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }, { file_data: { file_uri: 'https://youtube.com/shorts/' + video.id, mime_type: 'video/*' } }] }],
-          generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
+          generationConfig: { responseMimeType: 'application/json' }
         })
       });
       if(window.mrfUsage) window.mrfUsage.bump('gm');
@@ -10418,7 +10430,7 @@ window.MrfBatch = (function(){
     if(!gmKey) return null;
 
     try {
-      var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + gmKey;
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (localStorage.getItem('gm_model')||'gemini-3.8-flash') + ':generateContent?key=' + gmKey;
       var prompt = '이 쇼츠가 어떤 롱폼(원본) 영상에서 편집된 것인지 구글 검색으로 알아내. JSON으로만 답해: {"originalUrl":"유튜브 URL 또는 null","originalTitle":"제목 또는 null","confidence":"high/medium/low"}\n\n제목: ' + video.snippet.title + '\n채널: ' + video.snippet.channelTitle;
 
       var res = await fetch(url, {
@@ -10427,7 +10439,7 @@ window.MrfBatch = (function(){
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           tools: [{ google_search: {} }],
-          generationConfig: { temperature: 0.2 }
+          generationConfig: { maxOutputTokens: 4096 }
         })
       });
       if(window.mrfUsage) window.mrfUsage.bump('gm');
