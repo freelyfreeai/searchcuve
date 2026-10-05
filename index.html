@@ -4999,6 +4999,19 @@ body.light .hero-pill{
       <button class="btn-primary" id="searchBtn">검색</button>
     </div>
 
+    <!-- URL로 분석: 쇼츠/떡상 영상 링크를 붙여넣으면 검색 결과와 같은 카드로 분석 -->
+    <details id="urlBlock" class="kwblock" style="margin-top:12px">
+      <summary style="cursor:pointer;font-weight:700;font-size:13.5px;color:var(--fg)">🔗 영상 URL로 분석 <span style="font-weight:400;color:var(--dim);font-size:12px">— 쇼츠·떡상 영상 링크를 붙여넣으세요</span></summary>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+        <textarea id="urlQ" rows="4" placeholder="유튜브 쇼츠/영상 링크를 한 줄에 하나씩 붙여넣으세요 (최대 50개)&#10;예) https://www.youtube.com/shorts/xxxxxxxxxxx&#10;      https://youtu.be/xxxxxxxxxxx" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--border,rgba(128,128,128,.3));background:var(--bg-soft,transparent);color:var(--fg);font-size:13px;line-height:1.5;resize:vertical"></textarea>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button class="btn-primary" id="urlSearchBtn" type="button">URL 분석</button>
+          <span id="urlCount" style="font-size:12px;color:var(--dim)">0개</span>
+          <span style="font-size:12px;color:var(--dim)">결과는 아래에 검색 결과와 똑같이 나와요 (제품분석 · 원본찾기 · 쿠팡 · 채팅 모두 사용 가능)</span>
+        </div>
+      </div>
+    </details>
+
     <!-- API 키 미등록 안내 배너 -->
     <div id="apiKeyNotice" style="display:none;
       background:linear-gradient(135deg,rgba(255,59,48,.07) 0%,rgba(255,59,48,.03) 100%);
@@ -6848,7 +6861,14 @@ $('hotSearchBtn').onclick=async()=>{
 };
 
 // ---------- search ----------
-$('searchBtn').onclick=()=>doSearch(false);
+$('searchBtn').onclick=()=>{
+  // 검색창에 유튜브 링크를 붙여넣고 검색해도 URL 분석으로 자동 전환
+  const qv=$('q').value;
+  if(/youtu\.be\/|youtube\.com\//i.test(qv)&&extractYtIds(qv).length){$('urlQ').value=qv;$('q').value='';updateUrlCount();doUrlSearch();return;}
+  doSearch(false);
+};
+$('urlSearchBtn').onclick=doUrlSearch;
+$('urlQ').addEventListener('input',updateUrlCount);
 $('reSearchBtn').onclick=()=>doSearch(true);
 $('resetBtn').onclick=()=>{resetAll(true);toast('검색이 초기화됐어요');};
 
@@ -6888,7 +6908,7 @@ $('trendBtn').onclick=async()=>{
   }catch(e){status('급상승 불러오기 실패: '+e.message,true);}
 };
 
-$('q').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch(false);});
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter')$('searchBtn').click();});
 $('extraQ').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch(true);});
 
 // ===== 떡상 쇼츠아이템 검색 =====
@@ -7242,6 +7262,58 @@ async function doSearch(useExtra){
     } else {
       status('오류: '+msg+' (키/사용설정 확인)',true);
     }
+  }
+}
+// ---------- URL로 분석 (붙여넣은 영상 링크 → 검색 결과와 동일한 카드) ----------
+function extractYtIds(text){
+  const ids=[];
+  String(text||'').split(/[\s,]+/).forEach(tok=>{
+    if(!tok)return;
+    let m=tok.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([\w-]{11})/);
+    if(!m)m=tok.match(/^([\w-]{11})$/);
+    if(m)ids.push(m[1]);
+  });
+  return [...new Set(ids)];
+}
+function updateUrlCount(){const c=$('urlCount');if(c)c.textContent=extractYtIds($('urlQ').value).length+'개';}
+async function doUrlSearch(){
+  if(_checkGuestPaywall()) return;
+  if(_checkExpiredPaywall()) return;
+  const key=$('ytkey').value.trim()||localStorage.getItem('yt_key')||'';
+  if(!key){var nkm=document.getElementById('noApiKeyModal');if(nkm)nkm.classList.add('show');else status('먼저 YouTube API 키를 입력하세요.',true);return;}
+  const MAX=50;
+  const ids=extractYtIds($('urlQ').value);
+  if(!ids.length){status('유튜브 영상 링크를 붙여넣어 주세요. (예: https://www.youtube.com/shorts/…)',true);return;}
+  if(ids.length>MAX){status('한 번에 최대 '+MAX+'개까지 분석할 수 있어요. (현재 '+ids.length+'개)',true);return;}
+  status('<span class="spin"></span>영상 정보 불러오는 중…'); $('resbar').style.display='none';
+  try{
+    const vj=await(await fetch('https://www.googleapis.com/youtube/v3/videos?'+new URLSearchParams({part:'snippet,statistics,contentDetails,status',id:ids.join(','),key}))).json();
+    if(vj.error)throw new Error(vj.error.message);
+    const vids=vj.items||[];
+    if(!vids.length){CACHE=[];render();status('영상을 찾지 못했어요. 링크가 맞는지, 비공개/삭제된 영상은 아닌지 확인해주세요.',true);return;}
+    const subMap={};
+    const chIds=[...new Set(vids.map(v=>v.snippet.channelId))];
+    const cj=await(await fetch('https://www.googleapis.com/youtube/v3/channels?'+new URLSearchParams({part:'statistics',id:chIds.join(','),key}))).json();
+    (cj.items||[]).forEach(c=>subMap[c.id]=c.statistics.subscriberCount);
+    buildCache(vids,subMap);
+    markFlags();
+    // 붙여넣은 영상이 필터에 가려지지 않도록 결과 필터 초기화
+    ['vphBand','viewBand','formBand'].forEach(id=>{if($(id))$(id).value='';});
+    if($('onlyCp'))$('onlyCp').checked=false;
+    if($('licCcOnly'))$('licCcOnly').checked=false;
+    _licFilter='';
+    if($('sortBy'))$('sortBy').value='vph_desc';
+    const missing=ids.length-vids.length;
+    const cp=CACHE.filter(v=>v.coupang).length;
+    status('URL 분석 완료 — 영상 <b>'+CACHE.length+'</b>개 · 쿠팡링크 <b>'+cp+'</b>개'+(missing>0?' · 찾지 못한 링크 <b>'+missing+'</b>개':''));
+    render();
+    if(window.MrfHistory) MrfHistory.saveSearch('🔗 URL 분석 ('+CACHE.length+'개)', CACHE, { period:'', order:'url', celebOnly:false });
+  }catch(e){
+    var msg=e.message||String(e);
+    if(msg.toLowerCase().includes('failed to fetch')||msg.toLowerCase().includes('networkerror'))status('네트워크 오류 — API 키 제한 설정을 확인하세요.',true);
+    else if(msg.includes('quota')||msg.includes('Quota'))status('API 할당량 초과 — 내일 다시 시도하거나 새 API 키를 발급해주세요.',true);
+    else if(msg.includes('keyInvalid')||msg.includes('API key not valid'))status('API 키가 유효하지 않아요. API 키 설정 페이지에서 키를 다시 확인해주세요.',true);
+    else status('오류: '+msg,true);
   }
 }
 // vids+subMap → CACHE 구축 (검색/급상승 공통)
