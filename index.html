@@ -5079,6 +5079,12 @@ body.light .hero-pill{
         <label>기간
           <select id="period"><option value="" selected>전체</option><option value="7">7일</option><option value="30">30일</option><option value="90">90일</option><option value="365">1년</option></select>
         </label>
+        <label class="switch" title="같은 원본 영상으로 만든 쇼츠가 이미 여러 개 올라와 있으면 YPP '재사용 콘텐츠'로 걸릴 수 있어요. 검색 결과 안에서 제목·길이가 비슷한 영상끼리 묶어 개수를 세고, 기준 이상이면 숨겨요."><input type="checkbox" id="noSaturated" /> ♻️ 이미 많이 올라온 소재 거르기
+          <select id="satLimit" style="margin-left:4px"><option value="3">3개 이상</option><option value="5" selected>5개 이상</option><option value="10">10개 이상</option></select>
+        </label>
+        <label title="지금 뜨는 영상이 아니라, 과거(30일 전~1년 전)에 크게 터졌던 영상만 찾습니다. 수집 기준·기간 설정은 무시돼요.">📜 과거 떡상
+          <select id="pastHit"><option value="" selected>끔</option><option value="1000000">1년 내 · 100만+</option><option value="500000">1년 내 · 50만+</option><option value="100000">1년 내 · 10만+</option></select>
+        </label>
         <label>추가 검색어
           <input id="extraQ" placeholder="예: 여자, 명품, 데일리" style="width:140px;padding:8px 10px" />
         </label>
@@ -7084,6 +7090,7 @@ function updateExtraChip(extra){
 function resetAll(clearResults){
   $('q').value='';$('extraQ').value='';$('celebOnly').checked=false;
   $('order').value='mixed';$('period').value='';$('maxResults').value='90';
+  if($('pastHit'))$('pastHit').value='';if($('noSaturated'))$('noSaturated').checked=false;
   updateExtraChip('');
   var _cc=$('celebChip');if(_cc)_cc.style.display='none';
   // 결과 영역 필터 초기화
@@ -7096,11 +7103,12 @@ function resetAll(clearResults){
 }
 
 // 단일 정렬로 검색 (재사용 헬퍼)
-async function _ytSearchOne(q, apiOrder, desired, days, key){
+async function _ytSearchOne(q, apiOrder, desired, days, key, extra){
   let allIds=[], pageToken='';
   while(allIds.length < desired){
     const sp=new URLSearchParams({part:'snippet',q,type:'video',maxResults:String(Math.min(50, desired-allIds.length)),order:apiOrder,regionCode:'KR',relevanceLanguage:'ko',key});
     if(days) sp.set('publishedAfter', new Date(Date.now()-days*864e5).toISOString());
+    if(extra) Object.keys(extra).forEach(k=>sp.set(k,extra[k]));
     if(pageToken) sp.set('pageToken', pageToken);
     const sj = await (await fetch('https://www.googleapis.com/youtube/v3/search?'+sp)).json();
     if(sj.error) throw new Error(sj.error.message);
@@ -7157,11 +7165,16 @@ async function doSearch(useExtra){
     const isMixed = rawOrder === 'mixed';
     const apiOrder = combo ? 'viewCount' : (isMixed ? 'viewCount' : rawOrder);
     const desired=Number($('maxResults').value)||90;
-    const days=$('period').value;
+    let days=$('period').value;
+    const pastMin=Number(($('pastHit')&&$('pastHit').value)||0);
 
     let allIds = [];
 
-    if(isMixed){
+    if(pastMin){
+      // 과거 떡상: 30일 전 ~ 1년 전 업로드, 조회수순으로 수집 후 최소 조회수로 거름
+      status('<span class="spin"></span>과거 떡상 영상 수집 중… (30일~1년 전)');
+      allIds = await _ytSearchOne(q, 'viewCount', desired, 365, key, {publishedBefore:new Date(Date.now()-30*864e5).toISOString()});
+    } else if(isMixed){
       // 균형 모드: 조회수순 + 관련도순 이중 검색 후 합침 (유튜브 웹 검색과 유사)
       status('<span class="spin"></span>유튜브 검색 중… (조회수순)');
       const half = Math.ceil(desired * 0.6); // 조회수순 60%
@@ -7234,11 +7247,30 @@ async function doSearch(useExtra){
       }
     }
     markFlags();
+    // --- 신규 옵션 필터: 과거 떡상 / 동일소재(재사용 위험) 거르기 ---
+    {
+      const before=CACHE.length; let msgs=[];
+      if(pastMin){
+        CACHE=CACHE.filter(v=>v.views>=pastMin);
+        msgs.push('과거 떡상 기준 미달 '+(before-CACHE.length)+'개 제외');
+        $('sortBy').value='views_desc';
+      }
+      if($('noSaturated')&&$('noSaturated').checked){
+        const lim=Number($('satLimit').value)||5, b2=CACHE.length;
+        CACHE=CACHE.filter(v=>(v.dupN||1)<lim);
+        msgs.push('동일소재 '+lim+'개 이상 '+(b2-CACHE.length)+'개 제외');
+      }
+      if(!CACHE.length){
+        status('조건에 맞는 영상이 없습니다 ('+msgs.join(' · ')+'). 옵션을 느슨하게 하거나 개수를 늘려 다시 검색해 보세요.',true);
+        render(); return;
+      }
+      window._extraFilterMsg=msgs.length?(' · <span style="color:var(--dim)">'+msgs.join(' · ')+'</span>'):'';
+    }
     if(combo==='combo_viral')$('sortBy').value='ratio_desc';
     if(combo==='combo_verified')$('sortBy').value='verified_desc';
     const cp=CACHE.filter(v=>v.coupang).length;
     const hotCnt=CACHE.filter(v=>v.vph>=300).length;
-    status(`완료 — 총 <b>${CACHE.length}</b>개 · 쿠팡링크 <b>${cp}</b>개 · 급상승(VPH 300+) <b>${hotCnt}</b>개`);
+    status(`완료 — 총 <b>${CACHE.length}</b>개 · 쿠팡링크 <b>${cp}</b>개 · 급상승(VPH 300+) <b>${hotCnt}</b>개${window._extraFilterMsg||''}`);
     render();
     if(window.MrfHistory) MrfHistory.saveSearch(q, CACHE, { period:$('period').value, order:$('order').value, celebOnly:$('celebOnly').checked });
     // Track daily search usage for refund eligibility
@@ -7367,7 +7399,26 @@ function buildCache(vids,subMap){
     }
     return{id:v.id,title:s.title,channel:s.channelTitle,channelId:s.channelId,subs,views,likes,comments,date:s.publishedAt?.slice(0,10),desc,thumb:(s.thumbnails.medium||s.thumbnails.default).url,coupang:findCoupang(desc),ratio,dur,isShort:dur>0&&dur<=60,er:calcER(views,likes,comments,ratio),vph,hoursOld:Math.round(hours),product:null,licenseType,isEmbeddable,isLicensedContent,licenseBadge};});
 }
+// 동일소재 묶기: 제목(해시태그 제거) 유사도 + 길이 유사도로 같은 원본을 쓴 영상끼리 묶고, 서로 다른 채널 수를 dupN으로 기록
+function _normTitle(t){return String(t||'').toLowerCase().replace(/#\S+/g,' ').replace(/shorts?|쇼츠|추천|꿀템|필수템|가성비|리뷰|후기|ft\.?/g,' ').replace(/[^0-9a-z가-힣]/g,'');}
+function _bigrams(t){const m=new Map();for(let i=0;i<t.length-1;i++){const g=t.substr(i,2);m.set(g,(m.get(g)||0)+1);}return m;}
+function _dice(a,b,la,lb){if(la<2||lb<2)return 0;let x=0;a.forEach((c,g)=>{const d=b.get(g);if(d)x+=Math.min(c,d);});return 2*x/(la+lb-2);}
+function computeSaturation(){
+  const n=CACHE.length; if(!n)return;
+  const nt=CACHE.map(v=>_normTitle(v.title)), bg=nt.map(_bigrams);
+  const par=Array.from({length:n},(_,i)=>i);
+  const find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x];}return x;};
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+    const d=_dice(bg[i],bg[j],nt[i].length,nt[j].length);
+    const sameLen=CACHE[i].dur>0&&CACHE[j].dur>0&&Math.abs(CACHE[i].dur-CACHE[j].dur)<=1;
+    if(d>=0.6||(sameLen&&d>=0.35)){const a=find(i),b=find(j);if(a!==b)par[a]=b;}
+  }
+  const groups={};
+  CACHE.forEach((v,i)=>{const r=find(i);(groups[r]=groups[r]||[]).push(v);});
+  Object.keys(groups).forEach(r=>{const g=groups[r];const ch=new Set(g.map(v=>v.channelId||v.channel)).size;g.forEach(v=>v.dupN=ch);});
+}
 function markFlags(){
+  computeSaturation();
   const sorted=[...CACHE].sort((a,b)=>b.views-a.views);
   const topV=sorted.length?sorted[Math.floor(sorted.length/3)].views:0;
   CACHE.forEach(v=>{v.gold=v.coupang&&v.views>=topV;v.viral=v.ratio>=3&&v.views>=10000;});
@@ -7462,7 +7513,7 @@ function render(){
   }
   if(!list.length){box.innerHTML='<div class="empty">조건에 맞는 영상이 없습니다.</div>';return;}
   list.forEach(v=>{
-    const flags=[v.gold?'<span class="flag gold">황금</span>':'',v.coupang?'<span class="flag cp">쿠팡링크</span>':'',v.viral?'<span class="flag viral">떡상</span>':''].join('');
+    const flags=[v.gold?'<span class="flag gold">황금</span>':'',v.coupang?'<span class="flag cp">쿠팡링크</span>':'',v.viral?'<span class="flag viral">떡상</span>':'',(v.dupN>=2)?'<span class="flag" title="검색 결과 안에서 제목·길이가 비슷한(같은 원본으로 보이는) 영상이 서로 다른 채널에서 '+v.dupN+'개 발견됐어요. 많을수록 재사용 콘텐츠로 걸릴 위험이 커요." style="background:'+(v.dupN>=5?'rgba(239,68,68,.18);color:#ef4444':'rgba(245,158,11,.18);color:#d97706')+'">♻️ 동일소재 '+v.dupN+'개</span>':''].join('');
     const vb = vphBadge(v.vph, v.hoursOld);
     const vphTitle = vb.desc + '\n\n' + vphDesc(v.vph) + '\n※ VPH = Views Per Hour (시간당 조회수)';
     const vphBadgeHtml = `<span class="vph-badge ${vb.cls}" title="${vphTitle}"><span class="vph-icon">${vb.icon}</span><span class="vph-num"><span>${fmtVph(v.vph)}/h</span><span class="vph-state">${vb.state}</span></span></span>`;
