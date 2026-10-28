@@ -165,8 +165,12 @@ export function buildSubscription(planType, opts) {
 // the ADMIN_EMAIL Cloudflare env var; falls back to the owner's own address
 // if that var isn't set.
 export function isAdminEmail(env, email) {
-  const admin = String((env && env.ADMIN_EMAIL) || 'freelyfree@gmail.com').toLowerCase().trim();
-  return String(email || '').toLowerCase().trim() === admin;
+  // 기본 영구회원 목록 + ADMIN_EMAIL 환경변수(쉼표로 여러 개 가능)
+  const list = ['freelyfree@gmail.com', 'redho7586@gmail.com']
+    .concat(String((env && env.ADMIN_EMAIL) || '').split(','))
+    .map(e => e.toLowerCase().trim())
+    .filter(Boolean);
+  return list.indexOf(String(email || '').toLowerCase().trim()) !== -1;
 }
 
 // A permanent, always-active subscription (far-future period end) for the
