@@ -5079,11 +5079,11 @@ body.light .hero-pill{
         <label>기간
           <select id="period"><option value="" selected>전체</option><option value="7">7일</option><option value="30">30일</option><option value="90">90일</option><option value="365">1년</option></select>
         </label>
-        <label class="switch" title="같은 원본 영상으로 만든 쇼츠가 이미 여러 개 올라와 있으면 YPP '재사용 콘텐츠'로 걸릴 수 있어요. 검색 결과 안에서 제목·길이가 비슷한 영상끼리 묶어 개수를 세고, 기준 이상이면 숨겨요."><input type="checkbox" id="noSaturated" /> ♻️ 이미 많이 올라온 소재 거르기
-          <select id="satLimit" style="margin-left:4px"><option value="3">3개 이상</option><option value="5" selected>5개 이상</option><option value="10">10개 이상</option></select>
+        <label class="switch" title="같은 원본 영상으로 만든 쇼츠가 이미 여러 개 올라와 있으면 YPP '재사용 콘텐츠'로 걸릴 수 있어요. 검색 결과 안에서 제목·길이가 비슷한 영상끼리 묶고, 대표 영상 제목으로 유튜브를 한 번 더 검색해 실제 업로드 수를 확인한 뒤, 기준 이상이면 숨겨요. (API 할당량을 추가로 사용해요)"><input type="checkbox" id="noSaturated" /> ♻️ 이미 많이 올라온 소재 거르기
+          <select id="satLimit" style="margin-left:4px"><option value="10" selected>10개 이상</option><option value="50">50개 이상</option><option value="100">100개 이상</option></select>
         </label>
-        <label title="지금 뜨는 영상이 아니라, 과거(30일 전~1년 전)에 크게 터졌던 영상만 찾습니다. 수집 기준·기간 설정은 무시돼요.">📜 과거 떡상
-          <select id="pastHit"><option value="" selected>끔</option><option value="1000000">1년 내 · 100만+</option><option value="500000">1년 내 · 50만+</option><option value="100000">1년 내 · 10만+</option></select>
+        <label title="지금 뜨는 영상이 아니라, 업로드된 지 1년 넘게 지난 영상 중 크게 터졌던 영상만 찾습니다. 수집 기준·기간 설정은 무시돼요.">📜 과거 떡상
+          <select id="pastHit"><option value="" selected>끔</option><option value="1000000">1년 이상 지난 · 100만+</option><option value="500000">1년 이상 지난 · 50만+</option><option value="100000">1년 이상 지난 · 10만+</option></select>
         </label>
         <label>추가 검색어
           <input id="extraQ" placeholder="예: 여자, 명품, 데일리" style="width:140px;padding:8px 10px" />
@@ -7172,8 +7172,8 @@ async function doSearch(useExtra){
 
     if(pastMin){
       // 과거 떡상: 30일 전 ~ 1년 전 업로드, 조회수순으로 수집 후 최소 조회수로 거름
-      status('<span class="spin"></span>과거 떡상 영상 수집 중… (30일~1년 전)');
-      allIds = await _ytSearchOne(q, 'viewCount', desired, 365, key, {publishedBefore:new Date(Date.now()-30*864e5).toISOString()});
+      status('<span class="spin"></span>과거 떡상 영상 수집 중… (업로드 1년 이상 지난 영상)');
+      allIds = await _ytSearchOne(q, 'viewCount', desired, 0, key, {publishedBefore:new Date(Date.now()-365*864e5).toISOString()});
     } else if(isMixed){
       // 균형 모드: 조회수순 + 관련도순 이중 검색 후 합침 (유튜브 웹 검색과 유사)
       status('<span class="spin"></span>유튜브 검색 중… (조회수순)');
@@ -7256,7 +7256,8 @@ async function doSearch(useExtra){
         $('sortBy').value='views_desc';
       }
       if($('noSaturated')&&$('noSaturated').checked){
-        const lim=Number($('satLimit').value)||5, b2=CACHE.length;
+        const lim=Number($('satLimit').value)||10, b2=CACHE.length;
+        window._satErr='';await verifySaturation(key,lim);if(window._satErr)msgs.push('확인 중 오류('+window._satErr+') — 일부는 검색 결과 안 기준으로만 판정');
         CACHE=CACHE.filter(v=>(v.dupN||1)<lim);
         msgs.push('동일소재 '+lim+'개 이상 '+(b2-CACHE.length)+'개 제외');
       }
@@ -7415,7 +7416,35 @@ function computeSaturation(){
   }
   const groups={};
   CACHE.forEach((v,i)=>{const r=find(i);(groups[r]=groups[r]||[]).push(v);});
-  Object.keys(groups).forEach(r=>{const g=groups[r];const ch=new Set(g.map(v=>v.channelId||v.channel)).size;g.forEach(v=>v.dupN=ch);});
+  Object.keys(groups).forEach(r=>{const g=groups[r];const ch=new Set(g.map(v=>v.channelId||v.channel)).size;g.forEach(v=>{v.dupN=ch;v.cid=r;});});
+}
+// 실제 업로드 수 확인: 묶음별 대표 영상 제목으로 유튜브를 검색해 제목이 비슷한 영상 수를 센다 (묶음당 search.list 100~200 유닛, 최대 30묶음)
+async function verifySaturation(key,lim){
+  const MAXC=30, pages=lim>=100?2:1;
+  const groups={};
+  CACHE.forEach(v=>{(groups[v.cid]=groups[v.cid]||[]).push(v);});
+  const list=Object.values(groups).map(g=>g.sort((a,b)=>b.views-a.views)).sort((a,b)=>b[0].views-a[0].views).slice(0,MAXC);
+  let done=0;
+  for(const g of list){
+    done++;
+    status('<span class="spin"></span>이미 올라온 소재인지 확인 중… ('+done+'/'+list.length+')');
+    const rep=g[0];
+    const q=String(rep.title||'').replace(/#\S+/g,' ').replace(/\s+/g,' ').trim().slice(0,60);
+    if(!q)continue;
+    const rn=_normTitle(rep.title), rb=_bigrams(rn);
+    const ids=new Set(); let token='';
+    try{
+      for(let p=0;p<pages;p++){
+        const sp=new URLSearchParams({part:'snippet',q,type:'video',maxResults:'50',order:'relevance',regionCode:'KR',relevanceLanguage:'ko',key});
+        if(token)sp.set('pageToken',token);
+        const sj=await(await fetch('https://www.googleapis.com/youtube/v3/search?'+sp)).json();
+        if(sj.error)throw new Error(sj.error.message);
+        (sj.items||[]).forEach(it=>{const t=_normTitle(it.snippet&&it.snippet.title);if(_dice(rb,_bigrams(t),rn.length,t.length)>=0.5)ids.add(it.id.videoId);});
+        token=sj.nextPageToken; if(!token)break;
+      }
+    }catch(e){ window._satErr=e.message; break; }
+    g.forEach(v=>{v.dupN=Math.max(v.dupN||1,ids.size);});
+  }
 }
 function markFlags(){
   computeSaturation();
