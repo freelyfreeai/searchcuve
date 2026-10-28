@@ -7257,7 +7257,7 @@ async function doSearch(useExtra){
       }
       if($('noSaturated')&&$('noSaturated').checked){
         const lim=Number($('satLimit').value)||10, b2=CACHE.length;
-        window._satErr='';await verifySaturation(key,lim);if(window._satErr)msgs.push('확인 중 오류('+window._satErr+') — 일부는 검색 결과 안 기준으로만 판정');
+        await verifySaturation(key,lim);if(window._satErr)msgs.push('확인 중 오류('+window._satErr+') — 일부는 검색 결과 안 기준으로만 판정');if(window._satUnver)msgs.push('조회수 낮은 소재 '+window._satUnver+'묶음은 할당량 보호를 위해 정밀 확인 생략');
         CACHE=CACHE.filter(v=>(v.dupN||1)<lim);
         msgs.push('동일소재 '+lim+'개 이상 '+(b2-CACHE.length)+'개 제외');
       }
@@ -7418,12 +7418,15 @@ function computeSaturation(){
   CACHE.forEach((v,i)=>{const r=find(i);(groups[r]=groups[r]||[]).push(v);});
   Object.keys(groups).forEach(r=>{const g=groups[r];const ch=new Set(g.map(v=>v.channelId||v.channel)).size;g.forEach(v=>{v.dupN=ch;v.cid=r;});});
 }
-// 실제 업로드 수 확인: 묶음별 대표 영상 제목으로 유튜브를 검색해 제목이 비슷한 영상 수를 센다 (묶음당 search.list 100~200 유닛, 최대 30묶음)
+// 실제 업로드 수 확인(쇼츠·롱폼 모두 대상): 묶음별 대표 영상 제목으로 유튜브를 검색해, 제목이 비슷하거나(또는 길이가 같고 제목이 어느 정도 비슷한) 영상 수를 센다
+// 비용: search.list 페이지당 100유닛. 기준 10개=1페이지, 50개=2페이지, 100개=3페이지(결과 150개 중 비교)
 async function verifySaturation(key,lim){
-  const MAXC=30, pages=lim>=100?2:1;
+  const pages=lim>=100?3:(lim>=50?2:1), MAXC=lim>=100?20:(lim>=50?30:40);
+  window._satErr='';window._satUnver=0;
   const groups={};
   CACHE.forEach(v=>{(groups[v.cid]=groups[v.cid]||[]).push(v);});
-  const list=Object.values(groups).map(g=>g.sort((a,b)=>b.views-a.views)).sort((a,b)=>b[0].views-a[0].views).slice(0,MAXC);
+  const all=Object.values(groups).map(g=>g.sort((a,b)=>b.views-a.views)).sort((a,b)=>b[0].views-a[0].views);
+  const list=all.slice(0,MAXC); window._satUnver=all.length-list.length;
   let done=0;
   for(const g of list){
     done++;
@@ -7432,18 +7435,31 @@ async function verifySaturation(key,lim){
     const q=String(rep.title||'').replace(/#\S+/g,' ').replace(/\s+/g,' ').trim().slice(0,60);
     if(!q)continue;
     const rn=_normTitle(rep.title), rb=_bigrams(rn);
-    const ids=new Set(); let token='';
+    const found=[]; let token='';
     try{
       for(let p=0;p<pages;p++){
         const sp=new URLSearchParams({part:'snippet',q,type:'video',maxResults:'50',order:'relevance',regionCode:'KR',relevanceLanguage:'ko',key});
         if(token)sp.set('pageToken',token);
         const sj=await(await fetch('https://www.googleapis.com/youtube/v3/search?'+sp)).json();
         if(sj.error)throw new Error(sj.error.message);
-        (sj.items||[]).forEach(it=>{const t=_normTitle(it.snippet&&it.snippet.title);if(_dice(rb,_bigrams(t),rn.length,t.length)>=0.5)ids.add(it.id.videoId);});
+        (sj.items||[]).forEach(it=>{if(it.id&&it.id.videoId)found.push({id:it.id.videoId,t:_normTitle(it.snippet&&it.snippet.title)});});
         token=sj.nextPageToken; if(!token)break;
       }
+      // 길이 비교용 (videos.list 1유닛/50개)
+      const dur={};
+      for(let i=0;i<found.length;i+=50){
+        const vj=await(await fetch('https://www.googleapis.com/youtube/v3/videos?'+new URLSearchParams({part:'contentDetails',id:found.slice(i,i+50).map(x=>x.id).join(','),key}))).json();
+        if(vj.error)throw new Error(vj.error.message);
+        (vj.items||[]).forEach(v=>{dur[v.id]=parseDur(v.contentDetails&&v.contentDetails.duration);});
+      }
+      const ids=new Set([rep.id]);
+      found.forEach(x=>{
+        const d=_dice(rb,_bigrams(x.t),rn.length,x.t.length);
+        const sameLen=rep.dur>0&&dur[x.id]>0&&Math.abs(rep.dur-dur[x.id])<=1;
+        if(d>=0.5||(sameLen&&d>=0.35))ids.add(x.id);
+      });
+      g.forEach(v=>{v.dupN=Math.max(v.dupN||1,ids.size);v.dupVerified=true;});
     }catch(e){ window._satErr=e.message; break; }
-    g.forEach(v=>{v.dupN=Math.max(v.dupN||1,ids.size);});
   }
 }
 function markFlags(){
@@ -7542,7 +7558,7 @@ function render(){
   }
   if(!list.length){box.innerHTML='<div class="empty">조건에 맞는 영상이 없습니다.</div>';return;}
   list.forEach(v=>{
-    const flags=[v.gold?'<span class="flag gold">황금</span>':'',v.coupang?'<span class="flag cp">쿠팡링크</span>':'',v.viral?'<span class="flag viral">떡상</span>':'',(v.dupN>=2)?'<span class="flag" title="검색 결과 안에서 제목·길이가 비슷한(같은 원본으로 보이는) 영상이 서로 다른 채널에서 '+v.dupN+'개 발견됐어요. 많을수록 재사용 콘텐츠로 걸릴 위험이 커요." style="background:'+(v.dupN>=5?'rgba(239,68,68,.18);color:#ef4444':'rgba(245,158,11,.18);color:#d97706')+'">♻️ 동일소재 '+v.dupN+'개</span>':''].join('');
+    const flags=[v.gold?'<span class="flag gold">황금</span>':'',v.coupang?'<span class="flag cp">쿠팡링크</span>':'',v.viral?'<span class="flag viral">떡상</span>':'',(v.dupN>=2)?'<span class="flag" title="검색 결과 안에서 제목·길이가 비슷한(같은 원본으로 보이는) 영상이 서로 다른 채널에서 '+v.dupN+'개 발견됐어요'+(v.dupVerified?'(유튜브 검색으로 확인)':'(검색 결과 안 기준)')+'. 많을수록 재사용 콘텐츠로 걸릴 위험이 커요." style="background:'+(v.dupN>=5?'rgba(239,68,68,.18);color:#ef4444':'rgba(245,158,11,.18);color:#d97706')+'">♻️ 동일소재 '+v.dupN+'개</span>':''].join('');
     const vb = vphBadge(v.vph, v.hoursOld);
     const vphTitle = vb.desc + '\n\n' + vphDesc(v.vph) + '\n※ VPH = Views Per Hour (시간당 조회수)';
     const vphBadgeHtml = `<span class="vph-badge ${vb.cls}" title="${vphTitle}"><span class="vph-icon">${vb.icon}</span><span class="vph-num"><span>${fmtVph(v.vph)}/h</span><span class="vph-state">${vb.state}</span></span></span>`;
