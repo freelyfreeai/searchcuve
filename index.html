@@ -6741,6 +6741,7 @@ function openGuide(type){
     + `<ol>${g.steps.map(s=>`<li>${s.t}${s.f?GF(s.f):''}</li>`).join('')}</ol>`
     + (g.tip ? `<div class="tip">${g.tip}</div>` : '')
     + (g.warn ? `<div class="warn">${g.warn}</div>` : '')
+    + `<div class="gkakao" style="margin-top:18px;padding:18px;border-radius:12px;background:#FEE500;text-align:center"><div style="font-size:15px;font-weight:800;color:#3A1D1D;margin-bottom:4px">💬 따라 하다가 막히셨나요?</div><div style="font-size:12.8px;color:#3A1D1D;opacity:.85;margin-bottom:12px">화면을 캡처해서 보내주시면 하나하나 도와드려요.</div><button type="button" onclick="if(window.MrfSupport)MrfSupport.openKakao()" style="padding:12px 26px;background:#3A1D1D;color:#FEE500;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer">💛 카카오톡으로 문의하기</button></div>`
     + `<div class="gnote2">※ 그림은 이해를 돕는 도식이에요. 구글 화면의 문구·배치는 시기에 따라 조금씩 달라질 수 있어요. 막히면 하단 카카오톡 문의로 화면을 보내주세요.</div>`;
   $('guideContent').innerHTML = html;
   const gc=$('guideContent'); if(gc.parentElement) gc.parentElement.scrollTop=0;
