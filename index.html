@@ -5066,6 +5066,23 @@ body.light .hero-pill{
       <div class="presets" id="presets"></div>
     </div>
 
+    <!-- 매거진 채널 바로 검색 -->
+    <div class="kwblock">
+      <div class="kwlabel">✦ 매거진 채널 바로 검색</div>
+      <div class="presets" id="magChips" style="gap:6px;flex-wrap:wrap">
+        <button class="preset-chip" type="button" onclick="magSearch('보그코리아')">보그코리아</button>
+        <button class="preset-chip" type="button" onclick="magSearch('W Korea')">W Korea</button>
+        <button class="preset-chip" type="button" onclick="magSearch('하퍼스바자코리아')">하퍼스바자</button>
+        <button class="preset-chip" type="button" onclick="magSearch('ELLE Korea')">ELLE Korea</button>
+        <button class="preset-chip" type="button" onclick="magSearch('얼루어코리아')">얼루어코리아</button>
+        <button class="preset-chip" type="button" onclick="magSearch('GQ Korea')">GQ Korea</button>
+        <button class="preset-chip" type="button" onclick="magSearch('데이즈드코리아')">데이즈드코리아</button>
+        <button class="preset-chip" type="button" onclick="magSearch('마리끌레르코리아')">마리끌레르</button>
+        <button class="preset-chip" type="button" onclick="magSearch('싱글즈코리아')">싱글즈코리아</button>
+        <button class="preset-chip" type="button" onclick="magSearch('코스모폴리탄코리아')">코스모폴리탄</button>
+      </div>
+    </div>
+
     <!-- 구획 2: 실시간 인기 키워드 (쇼핑 / 검색) -->
     <div class="kwblock">
       <div class="kwlabel">실시간 인기</div>
@@ -6495,6 +6512,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/* ── 쇼핑 검색: 매거진 채널 칩 → 검색창에 넣고 바로 검색 ── */
+function magSearch(name){
+  var q=document.getElementById('q'); if(q) q.value=name;
+  if(typeof doSearch==='function') doSearch(false);
+}
 
 /* ── 추천 채널 빠른 검색 (칩 + 카드 공통) ── */
 function heroSetCh(q){
