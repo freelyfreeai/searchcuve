@@ -4512,6 +4512,25 @@ body.light .hero-pill{
 
 
 <!-- ============================================
+     CTA
+     ============================================ -->
+<section class="cta-section" id="start">
+  <div class="cta-glow" aria-hidden="true"></div>
+  <div class="cta-inner">
+    <h2>지금 바로 시작하세요.</h2>
+    <p>구글·카카오 계정으로 3초 만에 로그인. 3일 무료체험 후 계속 쓰실 때만 무통장입금으로 이용권을 구매하세요. 자동결제는 없습니다.</p>
+    <div class="cta-buttons">
+      <a href="#" class="btn-accent btn-lg" id="startBtn">
+        🎩 서치큐브 시작하기
+      </a>
+      <a href="#how" class="btn-primary btn-lg" style="background:var(--bg-elev);color:var(--fg);border:1px solid var(--line)">
+        사용법 먼저 보기
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
      CUVELAB PARTNER SECTION
      ============================================ -->
 <!-- ============================================
@@ -4541,33 +4560,14 @@ body.light .hero-pill{
         유튜브 · 쇼츠 · 블로그 · AI까지, <b>강의 경력 20년</b>의 실무 노하우를 그대로 전달합니다.</p>
       </div>
       <div class="cuvelab-right">
-        <a href="https://www.cuvelab.kr" target="_blank" rel="noopener" class="cuvelab-cta">
+        <a href="https://lab.cuve.kr" target="_blank" rel="noopener" class="cuvelab-cta">
           큐브랩 강의 보러 가기
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-        <p class="cuvelab-url">www.cuvelab.kr</p>
+        <p class="cuvelab-url">lab.cuve.kr</p>
       </div>
     </div>
 
-  </div>
-</section>
-
-<!-- ============================================
-     CTA
-     ============================================ -->
-<section class="cta-section" id="start">
-  <div class="cta-glow" aria-hidden="true"></div>
-  <div class="cta-inner">
-    <h2>지금 바로 시작하세요.</h2>
-    <p>구글·카카오 계정으로 3초 만에 로그인. 3일 무료체험 후 계속 쓰실 때만 무통장입금으로 이용권을 구매하세요. 자동결제는 없습니다.</p>
-    <div class="cta-buttons">
-      <a href="#" class="btn-accent btn-lg" id="startBtn">
-        🎩 서치큐브 시작하기
-      </a>
-      <a href="#how" class="btn-primary btn-lg" style="background:var(--bg-elev);color:var(--fg);border:1px solid var(--line)">
-        사용법 먼저 보기
-      </a>
-    </div>
   </div>
 </section>
 
@@ -8939,6 +8939,7 @@ window.MrfAuth = (function(){
       _applyServerState(data);
       _renderPayModal();
       updateAllUI();
+      _notifyOrder(data.order);
       if(typeof toast === 'function') toast('입금 신청이 접수됐어요 🏦');
     }).catch(function(err){
       if(err.status === 401){
@@ -8950,6 +8951,52 @@ window.MrfAuth = (function(){
     }).finally(function(){
       if(btn){ btn.disabled = false; btn.textContent = '📨 입금 신청하기'; }
     });
+  }
+  // 입금 신청이 들어오면 사장님 메일로 신청 정보 + 현금영수증 발급 방법을 보낸다
+  function _notifyOrder(o){
+    if(!o) return;
+    try {
+      var r = o.receipt || {};
+      var rLabel = r.type === 'income' ? '소득공제용 (휴대폰번호 ' + r.number + ')'
+                 : r.type === 'business' ? '지출증빙용 (사업자등록번호 ' + r.number + ')' : '신청 안 함';
+      var guide = [
+        '■ 처리 순서',
+        '1) 토스뱅크 앱에서 입금 내역(입금자명·금액) 확인',
+        '2) 서치큐브 관리자 로그인 → 구독 관리 → [입금 확인 (관리자)] 카드 → [입금 확인 · 승인]  https://searchcuve.com/#/app',
+        '',
+        '■ 현금영수증 발급 방법' + (r.type && r.type !== 'none' ? ' (이번 건은 발급 신청됨)' : ' (이번 건은 신청 없음)'),
+        '1) 홈택스 접속 후 사업자 인증서로 로그인  https://hometax.go.kr',
+        '2) 메뉴: 계산서·영수증·카드 → 현금영수증(가맹점) → 발급 → 현금영수증 건별 발급',
+        '3) 거래금액 = 입금액 / 용도 = ' + (r.type === 'business' ? '지출증빙용' : '소득공제용') + ' / 식별번호 = 신청자가 적은 번호(휴대폰 또는 사업자등록번호)',
+        '4) 발급 후 서치큐브 [입금 확인 (관리자)] 카드에서 [현금영수증 발급 완료] 누르기',
+        '※ 신청자가 요청한 건은 거래일로부터 가능한 한 빨리(5일 이내 권장) 발급하세요. 세부 기준은 국세청 안내를 확인하세요.',
+        '',
+        '■ 현금영수증 가맹점 등록이 안 되어 있다면 (최초 1회)',
+        '홈택스 → 계산서·영수증·카드 → 현금영수증(가맹점) → 발급 → 현금영수증 발급 사업자 신청 및 수정  https://hometax.go.kr',
+        '문의: 국세청 상담센터 126'
+      ].join('\n');
+      var info = [
+        '이용권: ' + o.planName,
+        '입금액: ' + Number(o.amount).toLocaleString() + '원',
+        '입금자명: ' + o.depositor,
+        '현금영수증: ' + rLabel,
+        '신청 회원: ' + o.email + (o.name ? ' (' + o.name + ')' : ''),
+        '신청 시각: ' + new Date(o.createdAt).toLocaleString('ko-KR'),
+        '주문번호: ' + o.id,
+        '입금 계좌: ' + BANK.bank + ' ' + BANK.acct + ' ' + BANK.holder
+      ].join('\n');
+      fetch('https://formsubmit.co/ajax/cuveent@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: '[서치큐브] 입금 신청 ' + Number(o.amount).toLocaleString() + '원 · ' + o.depositor,
+          _captcha: 'false',
+          _template: 'table',
+          신청정보: info,
+          처리방법_및_현금영수증_발급안내: guide
+        })
+      }).catch(function(){});
+    } catch(e){}
   }
   function cancelOrder(){
     if(!confirm('입금 신청을 취소할까요?\n이미 입금하셨다면 취소하지 말고 카카오톡으로 문의해 주세요.')) return;
@@ -9501,8 +9548,8 @@ window.MrfAuth = (function(){
       var refActive = getRefundEligibility();
       var refBadge = refActive.eligible ? '<div class="sub-card-refund-badge">💰 환불 가능 (' + refActive.daysLeft + '일 남음)</div>' : '';
       html = '<div class="sub-card">' +
-        '<div class="sub-card-title"><span class="sub-icon">✨</span>Pro 회원</div>' +
-        '<div class="sub-card-status">다음 결제 · <b>' + _fmtShort(sub.periodEnd) + '</b> (' + days + '일 뒤)</div>' +
+        '<div class="sub-card-title"><span class="sub-icon">👑</span>' + (sub.plan === 'admin' ? '영구 회원' : 'Pro 회원') + '</div>' +
+        '<div class="sub-card-status">' + (sub.plan === 'admin' ? '기간 제한 없이 이용 중' : '이용 기간 · <b>' + _fmtShort(sub.periodEnd) + '</b>까지 (' + days + '일 남음)') + '</div>' +
         refBadge +
         '<button class="sub-card-btn secondary" onclick="MrfAuth.startCancel()">구독 관리</button>' +
       '</div>';
@@ -11061,13 +11108,13 @@ window.MrfSubscriptionView = {
       el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🎁</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">무료 체험 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + tDays + '일</b> · ' + fmt(info.trialEnd) + ' 체험 종료</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 관리</button>';
     } else if(status === 'active'){
       var pDays = MrfAuth.getPeriodDaysLeft ? MrfAuth.getPeriodDaysLeft() : 0;
-      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">✨</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">Pro 구독 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">월정액 자동결제 · 이용 잔여 기간: <b style="color:var(--fg)">' + pDays + '일</b> (다음 결제 ' + fmt(info.periodEnd) + ')</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 해지</button>';
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,#4f46e5,#06b6d4);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">👑</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">' + (info.plan === 'admin' ? '영구 회원' : 'Pro 이용 중') + '</div><div style="font-size:13px;color:var(--dim);margin-top:4px">' + (info.plan === 'admin' ? '기간 제한 없이 모든 기능을 이용할 수 있어요' : '이용 잔여 기간: <b style="color:var(--fg)">' + pDays + '일</b> · ' + fmt(info.periodEnd) + '까지') + '</div></div></div>' + (info.plan === 'admin' ? '' : '<button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 해지</button>');
     } else if(status === 'cancelled_active'){
       var cDays = MrfAuth.getPeriodDaysLeft ? MrfAuth.getPeriodDaysLeft() : 0;
       el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:var(--surface2,#1a1a2e);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">⏳</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">해지 예정</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + cDays + '일</b> · ' + fmt(info.periodEnd) + '까지 이용 가능</div></div></div><button onclick="MrfAuth.reactivate()" style="width:100%;margin-top:12px;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">구독 재개</button>';
     } else if(status === 'once'){
       var oDays = MrfAuth.getPeriodDaysLeft ? MrfAuth.getPeriodDaysLeft() : 0;
-      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">📅</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">1개월 이용권</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + oDays + '일</b> · ' + fmt(info.periodEnd) + '까지</div></div></div><button onclick="MrfAuth.startSignup()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">월간 구독으로 전환</button>';
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,#4f46e5,#06b6d4);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">📅</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">' + (info.plan === 'annual' ? '연간 이용권' : '1개월 이용권') + '</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + oDays + '일</b> · ' + fmt(info.periodEnd) + '까지</div></div></div><button onclick="MrfAuth.startSignup()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">월간 구독으로 전환</button>';
     } else if(status === 'expired'){
       el.innerHTML = '<div style="text-align:center;padding:24px"><div style="font-size:36px;margin-bottom:10px">🔒</div><div style="font-size:15px;font-weight:700;color:var(--fg);margin-bottom:6px">이용 잔여 기간: 만료됨</div><div style="font-size:13px;color:var(--dim);margin-bottom:16px">활성 구독이 없습니다. 계속 이용하려면 구독을 시작하세요</div><button onclick="MrfAuth.unifiedStart()" style="padding:12px 28px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">✨ 구독 시작하기</button></div>';
     } else {
