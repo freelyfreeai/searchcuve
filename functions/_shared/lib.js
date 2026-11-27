@@ -4,7 +4,8 @@
 // ============================================
 
 export const PRICE_MONTHLY = 9900;
-export const PRICE_ONCE = 11900;
+export const PRICE_ONCE = 9900;
+export const PRICE_ANNUAL = 79200;
 export const TRIAL_DAYS = 3;
 
 export function json(data, status) {
@@ -135,6 +136,17 @@ export function buildSubscription(planType, opts) {
       amount: PRICE_ONCE
     };
   }
+  if (planType === 'annual') {
+    return {
+      status: 'once',
+      plan: 'annual',
+      startDate: now.toISOString(),
+      periodStart: now.toISOString(),
+      periodEnd: addDays(now, 365).toISOString(),
+      cardLast4: '',
+      amount: PRICE_ANNUAL
+    };
+  }
   if (opts.trialUsed) {
     return {
       status: 'active',
@@ -189,6 +201,35 @@ export function buildAdminSubscription() {
     periodEnd: far.toISOString(),
     cardLast4: '',
     amount: 0
+  };
+}
+
+// ---------- 무통장입금(현금) 주문 ----------
+export function planInfo(planType) {
+  if (planType === 'annual') return { name: 'Pro 연간 이용권', amount: PRICE_ANNUAL, days: 365 };
+  if (planType === 'once') return { name: 'Pro 1개월 이용권', amount: PRICE_ONCE, days: 30 };
+  return null;
+}
+
+// 입금 확인 후 이용권 적용. 이미 이용 중이면 남은 기간 뒤에 이어서 붙인다.
+export function applyPaidPlan(user, planType) {
+  const info = planInfo(planType);
+  const now = new Date();
+  let base = now;
+  const cur = user.subscription;
+  if (cur && (cur.status === 'once' || cur.status === 'active') && cur.periodEnd
+      && new Date(cur.periodEnd).getTime() > now.getTime()) {
+    base = new Date(cur.periodEnd);
+  }
+  return {
+    status: 'once',
+    plan: planType,
+    startDate: now.toISOString(),
+    periodStart: now.toISOString(),
+    periodEnd: addDays(base, info.days).toISOString(),
+    cardLast4: '',
+    amount: info.amount,
+    method: 'bank'
   };
 }
 
