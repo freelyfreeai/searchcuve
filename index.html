@@ -7345,7 +7345,8 @@ async function doSearch(useExtra){
     const combo=rawOrder.startsWith('combo_')?rawOrder:null;
     const isMixed = rawOrder === 'mixed';
     const apiOrder = combo ? 'viewCount' : (isMixed ? 'viewCount' : rawOrder);
-    const desired=Number($('maxResults').value)||90;
+    const desired0=Number($('maxResults').value)||90;
+    const desired=$('celebOnly').checked?Math.min(desired0*10,900):desired0; // 연예인만: 후보를 10배로 넓게 수집
     let days=$('period').value;
     const pastMin=Number(($('pastHit')&&$('pastHit').value)||0);
 
@@ -7393,7 +7394,7 @@ async function doSearch(useExtra){
       (cj.items||[]).forEach(c=>subMap[c.id]=c.statistics.subscriberCount);
     }
     buildCache(vids,subMap);
-    blkApply(true); window._blkQ=BLK.qHit(q);
+    blkApply(true); window._blkQ=BLK.qHit(q); window._celebMsg=''; const _cand=CACHE.length;
 
     // celebrity filter (Gemini, one batch call)
     if($('celebOnly').checked){
@@ -7406,7 +7407,7 @@ async function doSearch(useExtra){
       status('<span class="spin"></span>연예인 영상 분류 중… (Gemini AI 분석)');
       try{
         // 30개씩 배치로 나눠서 Gemini 호출 (API 토큰 절약)
-        const BATCH=30;
+        const BATCH=40;
         const kept=[];
         for(let b=0;b<CACHE.length;b+=BATCH){
           const slice=CACHE.slice(b,b+BATCH);
@@ -7424,7 +7425,7 @@ async function doSearch(useExtra){
           });
           if(b+BATCH<CACHE.length) status(`<span class="spin"></span>연예인 영상 분류 중… (${Math.min(b+BATCH,CACHE.length)}/${CACHE.length})`);
         }
-        CACHE=kept; blkApply(false);
+        CACHE=kept; blkApply(false); window._celebMsg='후보 '+_cand+'개 중 연예인 이름 확인 '+kept.length+'개';
         if(!CACHE.length){
           status('연예인 영상을 찾지 못했습니다. 검색어를 바꾸거나 연예인 필터를 해제해 보세요.',true);
           render(); return;
@@ -7439,6 +7440,7 @@ async function doSearch(useExtra){
     // --- 신규 옵션 필터: 과거 떡상 / 동일소재(재사용 위험) 거르기 ---
     {
       const before=CACHE.length; let msgs=[];
+      if(window._celebMsg)msgs.push(window._celebMsg);
       if(window._blkN)msgs.push('🚫 사용금지 연예인·채널 '+window._blkN+'개 제외');
       if(window._blkQ)msgs.push('검색어의 "'+window._blkQ+'"은(는) 사용하면 안 되는 대상이라 결과에서 제외돼요');
       const sr=window._subRange;
