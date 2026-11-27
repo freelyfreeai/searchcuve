@@ -1427,6 +1427,19 @@ body.light .float-card{box-shadow:0 16px 40px -14px rgba(26,22,20,.2)}
   .guide-content ol li a{color:var(--accent);font-weight:800;text-decoration:none;border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 50%,transparent)}
   .guide-content ol li a:hover{border-bottom-style:solid}
   /* 이용 가이드 아코디언 */
+  /* 사용법 동영상 · 전자책 */
+  .ug-media{display:grid;gap:14px;margin-top:16px}
+  .ug-mh{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .ug-mh b{display:block;font-size:15.5px;color:var(--fg,var(--txt))}
+  .ug-mh small{display:block;font-size:12px;color:var(--dim);margin-top:2px}
+  .ug-vwrap{position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000}
+  .ug-vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .ug-vlink{display:inline-block;margin-top:12px;font-size:13px;font-weight:700;color:var(--accent);text-decoration:none}
+  .ug-vlink:hover{text-decoration:underline}
+  .ug-ebook{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .ug-ebook .ug-mh{margin-bottom:0;flex:1;min-width:220px}
+  .ug-ebtn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#4f46e5,#06b6d4);color:#fff;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer}
+  .ug-ebtn[aria-disabled="true"]{background:var(--panel2);color:var(--dim);cursor:default;pointer-events:none}
   .ug-list{display:grid;gap:12px;margin-top:16px}
   .ug{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .ug>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px 18px}
@@ -4826,7 +4839,7 @@ body.light .hero-pill{
           <span class="ico">💳</span> <span>구독 관리</span>
         </a>
         <a class="app-side-item" data-view="guide">
-          <span class="ico">📖</span> <span>이용 가이드</span>
+          <span class="ico">📖</span> <span>이용가이드·사용법</span>
         </a>
         <a class="app-side-item" data-view="apikeys">
           <span class="ico">🔑</span> <span>API 키 설정</span>
@@ -5389,14 +5402,54 @@ body.light .hero-pill{
 </div>
 
 <!-- ============================================
-     PRO VIEW: 이용 가이드
+     PRO VIEW: 이용가이드·사용법
      ============================================ -->
 <div class="pro-view" data-view-content="guide" id="viewGuide">
   <div class="pv-head">
-    <h2 class="pv-title"><span class="ico">📖</span> 이용 가이드</h2>
+    <h2 class="pv-title"><span class="ico">📖</span> 이용가이드·사용법</h2>
     <button class="ug-allbtn" id="ugToggleAll" type="button" onclick="ugToggleAll()">전체 펼치기</button>
   </div>
   <p class="pv-sub">각 메뉴가 무엇을 하는 곳인지, 어떻게 쓰는지 정리했습니다. 궁금한 메뉴를 눌러 펼쳐 보세요.</p>
+  <div class="ug-media" id="ugMedia">
+    <div class="card pad ug-video">
+      <div class="ug-mh"><span class="ug-ico">🎬</span><div><b>사용법 동영상 강의</b><small>처음이라면 이 영상부터 보세요</small></div></div>
+      <div class="ug-vwrap"><iframe id="ugVideoFrame" title="서치큐브 사용법 동영상 강의" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <a class="ug-vlink" id="ugVideoLink" href="https://youtu.be/Uq9fDO296Rk" target="_blank" rel="noopener">유튜브에서 크게 보기 ↗</a>
+    </div>
+    <div class="card pad ug-ebook">
+      <div class="ug-mh"><span class="ug-ico">📚</span><div><b id="ugEbookTitle">사용법 전자책 (PDF)</b><small id="ugEbookSub">영상과 함께 보면 더 쉬워요 · 무료 다운로드</small></div></div>
+      <a class="ug-ebtn" id="ugEbookBtn" href="#" aria-disabled="true">⬇ 전자책 다운로드 (준비 중)</a>
+    </div>
+  </div>
+  <script>
+  /* 사용법 영상·전자책 설정 — 새 링크를 받으면 아래 값만 바꾸면 됩니다 */
+  window.SC_GUIDE = {
+    videoUrl: 'https://youtu.be/Uq9fDO296Rk',   // 사용법 동영상 강의 (유튜브 링크)
+    ebookUrl: '',                                // 전자책 PDF 주소 (비워 두면 '준비 중'으로 표시)
+    ebookTitle: '사용법 전자책 (PDF)'
+  };
+  (function(){
+    var g = window.SC_GUIDE || {};
+    function vid(u){
+      var m = String(u||'').match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);
+      return m ? m[1] : '';
+    }
+    function init(){
+      var id = vid(g.videoUrl), f = document.getElementById('ugVideoFrame'), l = document.getElementById('ugVideoLink');
+      if(f && id) f.src = 'https://www.youtube.com/embed/' + id + '?rel=0';
+      if(l && g.videoUrl) l.href = g.videoUrl;
+      var b = document.getElementById('ugEbookBtn'), t = document.getElementById('ugEbookTitle');
+      if(t && g.ebookTitle) t.textContent = g.ebookTitle;
+      if(b){
+        if(g.ebookUrl){
+          b.href = g.ebookUrl; b.target = '_blank'; b.rel = 'noopener'; b.setAttribute('download','');
+          b.removeAttribute('aria-disabled'); b.textContent = '⬇ 전자책 다운로드';
+        }
+      }
+    }
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  })();
+  </script>
   <div class="ug-list"><details class="ug" open><summary><span class="ug-ico">🔑</span><span class="ug-tt"><b>API 키 설정</b><small>처음 한 번만 하면 됩니다 · 무료</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>서치큐브가 유튜브·AI(제미나이)를 쓰려면 구글이 무료로 주는 <b>내 전용 열쇠(API 키)</b> 2개가 필요해요. 카드 등록도, 제미나이 구독도 필요 없습니다.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>🔑 API 키 설정</b>을 누르세요.</li><li>각 칸 옆 <b>"발급 가이드"</b> 버튼을 누르면 그림과 함께 한 단계씩 안내해 드려요. 아래 버튼으로 바로 열 수도 있어요.</li><li>받은 열쇠(<code>AIzaSy</code>로 시작)를 칸에 <b>붙여넣고 저장</b>하세요. YouTube 키와 Gemini 키는 <b>서로 다른 칸</b>입니다.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>열쇠는 내 브라우저에만 저장돼요. 다른 컴퓨터·휴대폰에서 접속하면 다시 넣어야 합니다. 메모장에 따로 적어 두세요.</li><li>YouTube 키는 무료지만 하루 검색 한도(약 100회 호출)가 있어요. 다 쓰면 다음 날 다시 채워지고, 영상 링크 분석은 거의 쓰지 않아요.</li><li>막히면 화면을 캡처해 카카오톡 문의로 보내 주세요.</li></ul></div><div class="ug-btns"><button onclick="ugOpenGuide('yt')">🎬 유튜브 키 발급 가이드 열기</button><button onclick="ugOpenGuide('gm')">🧠 제미나이 키 발급 가이드 열기</button></div></div></details><details class="ug"><summary><span class="ug-ico">🛍️</span><span class="ug-tt"><b>쇼핑 쇼츠아이템 검색</b><small>키워드로 직접 찾기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>유튜브에서 내가 원하는 키워드로 쇼츠·영상을 찾고, 조회수 속도(VPH)와 쿠팡 링크 여부 등을 한눈에 보여주는 메인 검색 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>위쪽 <b>카테고리</b>(주방/패션/뷰티 등)를 고르거나 <b>전체</b>를 그대로 두세요.</li><li>검색창에 키워드를 쓰고 <b>검색</b>을 누르세요. (예: 다이소 추천템) 키워드가 막막하면 <b>추천 키워드</b>·<b>실시간 인기</b> 칩을 누르면 바로 검색돼요.</li><li><b>세부 검색</b>에서 수집 기준·개수·기간을 조절하고 <b>🔄 재검색</b>을 누르면 다시 찾아줘요.</li><li>결과 위의 <b>정렬 · VPH 구간 · 조회수 구간 · 영상 형식 · 쿠팡링크 있는 영상만</b>으로 목록을 걸러 보세요.</li><li>카드를 열어 <b>제품 분석 · 원본 찾기 · 쿠팡 · 채팅</b> 버튼, <b>⭐ 즐겨찾기</b>, <b>📦 배치 추적</b>을 사용하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li><b>VPH</b>는 "시간당 조회수"예요. 높을수록 지금 알고리즘이 밀어주는 영상입니다.</li><li><b>♻️ 이미 많이 올라온 소재 거르기</b>: 같은 원본으로 만든 쇼츠가 이미 많으면 재사용 콘텐츠로 걸릴 수 있어요. 기준(10·50·100개 이상)을 고르면 그런 소재를 숨겨 줘요. (API를 더 씁니다)</li><li><b>📜 과거 떡상</b>: 올라온 지 1~3년 된 영상 중 100만+ 같은 큰 조회수 영상만 찾아줘요. (3년 이내만 검색) 오래돼도 검증된 소재를 새로 만들 때 좋아요.</li><li><b>🔗 영상 URL로 분석</b>: 이미 아는 영상 링크를 붙여넣으면 검색 결과와 똑같은 카드로 분석해요.</li><li><b>🛡️ CC 재사용 허용 영상만</b>을 켜면 재편집이 허용된 영상만 보여요 (출처 표기 필수).</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📈</span><span class="ug-tt"><b>떡상 쇼츠아이템 검색</b><small>지금 뜨는 영상 찾기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>관심 주제·영상 타입·구독자 구간을 골라, 구독자는 적은데 조회수가 크게 터진 영상을 찾아주는 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li><b>관심 주제</b>(건강, 영화/드라마, 뷰티, 요리 등)를 고르세요.</li><li><b>영상 타입</b>(전체·쇼츠·롱폼)과 <b>구독자 구간</b>(예: 0~1만명 급성장)을 고르세요.</li><li><b>검색</b>을 누르면 조건에 맞는 영상이 카드로 나와요. <b>📈 실시간 급상승 영상</b> 버튼은 지금 유튜브에서 가장 핫한 영상을 바로 가져와요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>구독자 구간을 작게(0~1만) 하면 "작은 채널인데 크게 터진" 영상을 찾기 좋아요.</li><li>마음에 드는 영상은 ⭐로 저장해 두세요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">⭐</span><span class="ug-tt"><b>즐겨찾기</b><small>마음에 든 영상 모아보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>검색 결과 카드에서 별(⭐)을 눌러 저장한 영상을 한곳에서 다시 보는 보관함이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>검색·떡상 화면에서 영상 카드의 <b>⭐</b>를 누르세요.</li><li>왼쪽 메뉴 <b>⭐ 즐겨찾기</b>에서 저장한 영상을 다시 보세요.</li><li>필요 없으면 별을 다시 눌러 해제하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>벤치마킹할 영상을 5~10개 모아 두고 꾸준히 보면 감이 빨리 늘어요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📜</span><span class="ug-tt"><b>검색 기록</b><small>내가 찾았던 검색 다시 보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>이전에 검색한 키워드와 결과를 다시 열어보는 곳이에요. (기능을 순차적으로 열고 있어요.)</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>📜 검색 기록</b>을 누르세요.</li><li>이전 검색을 눌러 결과를 다시 확인하세요.</li></ol></div></details><details class="ug"><summary><span class="ug-ico">🌅</span><span class="ug-tt"><b>오늘의 발굴</b><small>매일 아침 자동 수집</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>키워드를 미리 등록해 두면, 매일 아침 첫 방문 때 급상승 영상을 자동으로 모아 리포트로 보여줘요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li><b>+ 키워드 추가</b>로 추적할 키워드를 넣으세요 (최대 10개). 키워드마다 최소 조회수와 기간을 정할 수 있어요.</li><li><b>자동 실행 시간</b>을 정하세요. 그 시간 이후 첫 방문 때 자동 실행돼요.</li><li><b>🚀 지금 발굴 시작</b>을 누르면 바로 수집돼요. 아래 <b>오늘의 발굴 리포트</b>에서 결과를 확인하세요.</li><li>(선택) 이메일 알림을 켜면 결과를 메일로도 받아요. 처음 한 번 인증 메일의 확인을 눌러야 해요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>키워드는 "제품 카테고리 + 효능"처럼 구체적일수록 좋아요.</li><li>발굴 때마다 API가 쓰이니 키워드 수를 적당히 정하세요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">👁️</span><span class="ug-tt"><b>채널 감시</b><small>경쟁 채널 새 영상 감지</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>잘 되는 채널을 등록해 두면 새 영상이 올라올 때 빠르게 알려줘서, 트렌드가 포화되기 전에 먼저 올라탈 수 있어요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>👁️ 채널 감시</b>를 누르세요.</li><li>감시할 채널을 추가하세요.</li><li>새 영상이 올라오면 목록에 표시돼요. 눌러서 바로 확인하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>본받고 싶은 채널 몇 개만 꾸준히 보는 게 효율적이에요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📦</span><span class="ug-tt"><b>배치 추적</b><small>영상을 날짜별로 모아 보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>검색 결과에서 📦를 누른 영상이 날짜별로 쌓여서, 조회수 변화를 비교하고 CSV로 저장할 수 있는 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>검색 결과 카드의 <b>📦</b> 버튼을 누르세요.</li><li>왼쪽 메뉴 <b>📦 배치 추적</b>에서 날짜별로 쌓인 영상을 확인하세요.</li><li><b>💾 CSV</b>로 내려받거나 <b>🗑 전체삭제</b>로 비울 수 있어요. (삭제하면 되돌릴 수 없어요.)</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>같은 영상을 며칠 간격으로 모으면 조회수가 어떻게 늘어나는지 비교할 수 있어요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">💳</span><span class="ug-tt"><b>구독 관리</b><small>이용 기간 · 해지 · 환불</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>내 이용 상태를 확인하고, 해지나 환불 문의를 하는 곳이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>💳 구독 관리</b>를 누르세요.</li><li>남은 이용 기간과 결제 내역을 확인하세요.</li><li>이용권을 사려면 <b>이용권 구매</b>에서 1개월권/연간 이용권을 고르고, 안내된 <b>토스뱅크 계좌로 입금</b> 후 <b>입금 신청하기</b>를 누르세요. 입금이 확인되면 바로 켜져요. <b>현금영수증</b>도 신청할 수 있어요.</li><li>해지·환불·결제 오류는 아래 <b>카카오톡 문의</b>로 연락하시면 빠르게 도와드려요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>처음 가입하면 3일 무료 체험이 먼저 시작돼요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">💬</span><span class="ug-tt"><b>카카오톡 고객문의</b><small>막히면 바로 물어보세요</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>읽어봐도 어려운 부분은 부담 없이 물어보세요. 화면을 캡처해서 보내주시면 가장 빨라요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>아래 <b>💛 카카오톡으로 문의하기</b> 버튼을 누르세요.</li><li>카카오톡 채팅창이 열리면 궁금한 점과 화면 캡처를 보내 주세요.</li></ol></div></details></div>
   <div class="card pad" style="text-align:center;padding:26px;margin-top:16px">
     <div style="font-size:15px;font-weight:700;color:var(--fg);margin-bottom:8px">💬 읽어봐도 어려운 부분이 있으신가요?</div>
