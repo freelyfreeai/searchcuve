@@ -3736,7 +3736,7 @@ body.light .hero-pill{
   <div style="background:var(--panel,#1a1d24);border:1px solid var(--line,#252833);border-radius:24px;padding:44px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:fadeUp .3s ease">
     <div style="font-size:52px;margin-bottom:16px">⏰</div>
     <h2 style="font-family:'Pretendard','Inter',sans-serif;font-style:italic;font-weight:900;font-size:22px;color:var(--fg);margin:0 0 10px">3일간의 무료 체험이<br>종료되었습니다</h2>
-    <p style="color:var(--dim,#a5adc0);font-size:14px;line-height:1.7;margin:0 0 28px">서치큐브의 모든 기능을 계속 이용하려면<br>로그인 후 구독을 시작해 주세요.<br><br><b style="color:var(--fg)">월 9,900원</b>으로 급상승 아이템을 무제한 발굴하세요 🚀</p>
+    <p style="color:var(--dim,#a5adc0);font-size:14px;line-height:1.7;margin:0 0 28px">서치큐브의 모든 기능을 계속 이용하려면<br>로그인 후 구독을 시작해 주세요.<br><br><b style="color:var(--fg)">1개월 9,900원 · 연 79,200원</b> 무통장입금으로<br>급상승 아이템을 계속 발굴하세요 🚀</p>
     <button onclick="MrfAuth.unifiedStart(); document.getElementById('guestPaywallModal').style.display='none'" style="width:100%;padding:16px;border-radius:12px;border:none;background:linear-gradient(135deg,#B03737,#8B2020);color:#fff;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px">
       🚀 지금 시작하기
     </button>
@@ -3753,9 +3753,9 @@ body.light .hero-pill{
   <div style="background:var(--panel,#1a1d24);border:1px solid var(--line,#252833);border-radius:24px;padding:44px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:fadeUp .3s ease">
     <div style="font-size:52px;margin-bottom:16px">🔒</div>
     <h2 style="font-family:'Pretendard','Inter',sans-serif;font-style:italic;font-weight:900;font-size:22px;color:var(--fg);margin:0 0 10px">무료 체험이 종료되었습니다</h2>
-    <p style="color:var(--dim,#a5adc0);font-size:14px;line-height:1.7;margin:0 0 28px">서치큐브를 계속 사용하려면<br>구독이 필요합니다.<br><br><b style="color:var(--fg)">월 9,900원</b>으로 유튜브 급상승 아이템을<br>무제한 발굴하세요 🚀</p>
-    <button onclick="document.getElementById('expiredPaywallModal').style.display='none'; MrfAuth && MrfAuth.openModal && MrfAuth.openModal('authPayment')" style="width:100%;padding:16px;border-radius:12px;border:none;background:linear-gradient(135deg,#B03737,#8B2020);color:#fff;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px">
-      💳 구독 시작하기
+    <p style="color:var(--dim,#a5adc0);font-size:14px;line-height:1.7;margin:0 0 28px">서치큐브를 계속 사용하려면<br>구독이 필요합니다.<br><br><b style="color:var(--fg)">연 79,200원 · 1개월 9,900원</b> 무통장입금으로<br>유튜브 급상승 아이템을 계속 발굴하세요 🚀</p>
+    <button onclick="document.getElementById('expiredPaywallModal').style.display='none'; MrfAuth && MrfAuth.unifiedStart && MrfAuth.unifiedStart()" style="width:100%;padding:16px;border-radius:12px;border:none;background:linear-gradient(135deg,#B03737,#8B2020);color:#fff;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px">
+      🏦 이용권 구매하기 (무통장입금)
     </button>
     <button onclick="document.getElementById('expiredPaywallModal').style.display='none'" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--line,#252833);background:transparent;color:var(--dim,#a5adc0);font-size:14px;cursor:pointer">
       나중에 할게요
@@ -3778,7 +3778,7 @@ body.light .hero-pill{
     <div>
       <div class="hero-pill" id="heroPill">
         <span class="dot"></span>
-        <span id="heroPillText">3일 무료체험 후 월 9,900원 · 언제든 해지</span>
+        <span id="heroPillText">3일 무료체험 · 자동결제 없음 · 무통장입금</span>
       </div>
       <script>
       (function(){
@@ -3794,7 +3794,7 @@ body.light .hero-pill{
               if(daysLeft>0){
                 el.innerHTML='<b style="color:var(--accent)">무료 체험 D-'+daysLeft+'</b> · '+daysLeft+'일 남았습니다';
               } else {
-                el.innerHTML='무료 체험 종료 · 지금 구독하면 계속 사용 가능';
+                el.innerHTML='무료 체험 종료 · 이용권을 구매하면 계속 사용 가능';
               }
             }
           }
@@ -3893,7 +3893,7 @@ body.light .hero-pill{
     </div>
     <div class="trust-item">
       <div class="n">9,900원</div>
-      <div class="l">월 이용료 · 3일 무료체험</div>
+      <div class="l">1개월 이용권 · 3일 무료체험</div>
     </div>
   </div>
 </section>
@@ -4442,50 +4442,17 @@ body.light .hero-pill{
     <h2 class="section-title">단순한 가격, 확실한 <span class="accent-word">가치</span>.</h2>
     <p class="section-sub">API 키는 당신 것, 데이터도 당신 것. 우리는 당신의 시간을 아껴주는 소프트웨어만 팝니다.</p>
 
-    <!-- 월간/연간 토글 -->
-    <div class="billing-toggle" id="billingToggle">
-      <button class="bt-btn bt-active" id="btMonthly" onclick="setBilling('monthly')">월간</button>
-      <button class="bt-btn" id="btAnnual" onclick="setBilling('annual')">
-        연간
-        <span class="bt-badge">2개월 무료</span>
-      </button>
-    </div>
-    <style>
-    .billing-toggle{display:flex;align-items:center;gap:4px;background:var(--surface2,#1a1a2e);border-radius:30px;padding:4px;margin:0 auto 28px;width:fit-content;border:1px solid rgba(255,255,255,.08)}
-    .bt-btn{padding:8px 22px;border-radius:26px;border:none;background:transparent;color:var(--text,#e0e0e0);font-size:.9rem;cursor:pointer;font-weight:500;transition:all .25s;position:relative}
-    .bt-btn.bt-active{background:var(--accent,#7c6ef4);color:#fff;font-weight:700}
-    .bt-badge{background:#22c55e;color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
-    </style>
-    <script>
-    var _billing='monthly';
-    function setBilling(mode){
-      _billing=mode;
-      document.getElementById('btMonthly').className='bt-btn'+(mode==='monthly'?' bt-active':'');
-      document.getElementById('btAnnual').className='bt-btn'+(mode==='annual'?' bt-active':'');
-      var numEl=document.getElementById('planProNum');
-      var cycleEl=document.getElementById('planProCycle');
-      var noteEl=document.getElementById('planProNote');
-      if(mode==='annual'){
-        if(numEl)numEl.innerHTML='6,600<span class="plan-unit">원/월</span>';
-        if(cycleEl)cycleEl.textContent='연 79,200원 · 2개월 무료';
-        if(noteEl)noteEl.textContent='연 79,200원 일시결제 · 언제든 해지 가능';
-      } else {
-        if(numEl)numEl.innerHTML='9,900<span class="plan-unit">원/월</span>';
-        if(cycleEl)cycleEl.textContent='3일 무료체험 · 언제든 해지';
-        if(noteEl)noteEl.textContent='3일 후 월 9,900원 자동결제 · 언제든 해지 가능';
-      }
-    }
-    </script>
+    <p style="text-align:center;margin:0 auto 22px;max-width:560px;font-size:.92rem;line-height:1.7;color:var(--dim,#a5adc0)">🎁 처음이신가요? 가입하면 <b style="color:var(--fg,#fff)">3일 무료체험</b>이 바로 시작돼요. 카드도, 입금도 필요 없어요.<br>계속 쓰고 싶을 때만 아래 이용권을 <b style="color:var(--fg,#fff)">무통장입금</b>으로 구매하세요. <a href="#" onclick="MrfAuth.startSignup(); return false;" style="color:var(--accent);font-weight:700">무료체험 시작 →</a></p>
 
     <div class="plan-grid">
-      <!-- 월간/연간 구독 -->
+      <!-- 연간 이용권 -->
       <div class="plan-card plan-pro">
         <div class="plan-badge">RECOMMENDED</div>
         <div class="plan-head">
-          <div class="plan-name">월간 구독</div>
+          <div class="plan-name">연간 이용권</div>
           <div class="plan-price">
-            <span class="plan-num" id="planProNum">9,900<span class="plan-unit">원/월</span></span>
-            <span class="plan-cycle" id="planProCycle">3일 무료체험 · 언제든 해지</span>
+            <span class="plan-num">6,600<span class="plan-unit">원/월</span></span>
+            <span class="plan-cycle">연 79,200원 선입금 · 4개월 무료</span>
           </div>
           <div class="plan-tag">쇼츠 크리에이터 · 쿠팡 셀러용</div>
         </div>
@@ -4497,10 +4464,10 @@ body.light .hero-pill{
           <li><span class="pf-check">✓</span> CSV/Excel 내보내기</li>
           <li><span class="pf-check">✓</span> 우선 지원 (카카오톡 채널)</li>
         </ul>
-        <button class="plan-btn plan-btn-primary" onclick="MrfAuth.startSignup(_billing==='annual'?'annual':undefined); return false;">
-          ✨ 3일 무료로 시작하기
+        <button class="plan-btn plan-btn-primary" onclick="MrfAuth.startSignup('annual'); return false;">
+          🏦 연간 이용권 신청하기
         </button>
-        <div class="plan-note" id="planProNote">3일 후 월 9,900원 자동결제 · 언제든 해지 가능</div>
+        <div class="plan-note">무통장입금 · 자동결제 없음 · 현금영수증 발급 가능</div>
       </div>
 
       <!-- 1개월권 플랜 -->
@@ -4508,8 +4475,8 @@ body.light .hero-pill{
         <div class="plan-head">
           <div class="plan-name">1개월권</div>
           <div class="plan-price">
-            <span class="plan-num">11,900<span class="plan-unit">원</span></span>
-            <span class="plan-cycle">1회 결제 · 자동갱신 없음</span>
+            <span class="plan-num">9,900<span class="plan-unit">원</span></span>
+            <span class="plan-cycle">30일 이용 · 자동갱신 없음</span>
           </div>
           <div class="plan-tag">한 달만 써보실 분</div>
         </div>
@@ -4517,11 +4484,12 @@ body.light .hero-pill{
           <li><span class="pf-check">✓</span> 모든 기능</li>
           <li><span class="pf-check">✓</span> 30일간 사용</li>
           <li><span class="pf-check">✓</span> 자동갱신 없음</li>
-          <li class="pf-dim">무료체험 없음</li>
+          <li class="pf-dim">현금영수증 발급 가능</li>
         </ul>
         <button class="plan-btn plan-btn-secondary" onclick="MrfAuth.startSignup('once'); return false;">
-          1개월권 구매하기
+          🏦 1개월권 신청하기
         </button>
+        <div class="plan-note">무통장입금 · 입금 확인 후 바로 이용</div>
       </div>
     </div>
 
@@ -4532,11 +4500,11 @@ body.light .hero-pill{
       </div>
       <div class="pn-item">
         <span class="pn-icon">🔄</span>
-        <div><b>언제든 해지 가능</b><br><small>3일 이내 미사용 시 전액 환불</small></div>
+        <div><b>자동결제 없음</b><br><small>3일 이내 미사용 시 전액 환불</small></div>
       </div>
       <div class="pn-item">
-        <span class="pn-icon">💳</span>
-        <div><b>안전한 결제</b><br><small>토스페이먼츠 · 카드 정보 미저장</small></div>
+        <span class="pn-icon">🏦</span>
+        <div><b>무통장입금 · 현금영수증</b><br><small>카드 정보 없이 계좌이체로 결제 · 자동결제 없음</small></div>
       </div>
     </div>
   </div>
@@ -4591,7 +4559,7 @@ body.light .hero-pill{
   <div class="cta-glow" aria-hidden="true"></div>
   <div class="cta-inner">
     <h2>지금 바로 시작하세요.</h2>
-    <p>구글·카카오 계정으로 3초 만에 로그인. 3일 무료체험 후 월 9,900원이 자동결제됩니다.</p>
+    <p>구글·카카오 계정으로 3초 만에 로그인. 3일 무료체험 후 계속 쓰실 때만 무통장입금으로 이용권을 구매하세요. 자동결제는 없습니다.</p>
     <div class="cta-buttons">
       <a href="#" class="btn-accent btn-lg" id="startBtn">
         🎩 서치큐브 시작하기
@@ -4701,9 +4669,9 @@ body.light .hero-pill{
     </ul>
 
     <h3>제5조 (요금 및 결제)</h3>
-    <p>① 무료체험 기간(3일) 종료 후 선택한 요금제에 따라 자동결제됩니다.</p>
-    <p>② 결제는 신용카드, 체크카드 등 회사가 지정한 수단으로 진행됩니다.</p>
-    <p>③ 이용자는 서비스 내 구독 관리 메뉴에서 언제든지 해지할 수 있으며, 해지 시 잔여 기간까지 서비스를 이용할 수 있습니다.</p>
+    <p>① 무료체험 기간(3일) 종료 후 계속 이용하시려면 이용권(1개월권 9,900원 / 연간 이용권 79,200원)을 선결제하셔야 하며, 자동결제는 이루어지지 않습니다.</p>
+    <p>② 결제는 회사가 지정한 계좌로의 무통장입금(계좌이체)으로만 진행되며, 회사가 입금을 확인한 때부터 이용 기간이 시작됩니다. 이용자가 요청하는 경우 현금영수증(소득공제용 또는 지출증빙용)을 발급합니다.</p>
+    <p>③ 이용권은 구매한 기간 동안 이용할 수 있으며, 기간이 끝나면 자동으로 종료됩니다. 이용자는 서비스 내 구독 관리 메뉴에서 언제든지 해지할 수 있습니다.</p>
     <p>④ 환불은 관련 법령 및 회사 환불 정책에 따릅니다. 서비스를 이미 이용한 경우 이용분에 대한 요금은 공제됩니다.</p>
 
     <h3>제6조 (책임 제한)</h3>
@@ -4734,7 +4702,7 @@ body.light .hero-pill{
     <p><b>필수 항목</b></p>
     <ul>
       <li>회원가입 시: 이메일 주소, 비밀번호(암호화 저장), 서비스 이용 기록</li>
-      <li>결제 시: 결제수단 정보(카드번호는 PG사에서 관리, 회사 미보유), 결제 이력</li>
+      <li>결제 시: 입금자명, 현금영수증 신청 시 휴대폰번호 또는 사업자등록번호, 입금·결제 이력 (카드 정보는 수집하지 않음)</li>
     </ul>
     <p><b>자동 수집 항목</b></p>
     <ul>
@@ -4777,7 +4745,6 @@ body.light .hero-pill{
     <p>회사는 원활한 서비스 제공을 위해 아래와 같이 개인정보 처리를 위탁합니다.</p>
     <ul>
       <li><b>Amazon Web Services, Inc.</b>: 서버 인프라 운영 (데이터 보관)</li>
-      <li><b>결제대행사(PG사)</b>: 결제 처리 및 카드 정보 관리</li>
     </ul>
 
     <h3>7. 이용자의 권리</h3>
@@ -5430,7 +5397,7 @@ body.light .hero-pill{
     <button class="ug-allbtn" id="ugToggleAll" type="button" onclick="ugToggleAll()">전체 펼치기</button>
   </div>
   <p class="pv-sub">각 메뉴가 무엇을 하는 곳인지, 어떻게 쓰는지 정리했습니다. 궁금한 메뉴를 눌러 펼쳐 보세요.</p>
-  <div class="ug-list"><details class="ug" open><summary><span class="ug-ico">🔑</span><span class="ug-tt"><b>API 키 설정</b><small>처음 한 번만 하면 됩니다 · 무료</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>서치큐브가 유튜브·AI(제미나이)를 쓰려면 구글이 무료로 주는 <b>내 전용 열쇠(API 키)</b> 2개가 필요해요. 카드 등록도, 제미나이 구독도 필요 없습니다.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>🔑 API 키 설정</b>을 누르세요.</li><li>각 칸 옆 <b>"발급 가이드"</b> 버튼을 누르면 그림과 함께 한 단계씩 안내해 드려요. 아래 버튼으로 바로 열 수도 있어요.</li><li>받은 열쇠(<code>AIzaSy</code>로 시작)를 칸에 <b>붙여넣고 저장</b>하세요. YouTube 키와 Gemini 키는 <b>서로 다른 칸</b>입니다.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>열쇠는 내 브라우저에만 저장돼요. 다른 컴퓨터·휴대폰에서 접속하면 다시 넣어야 합니다. 메모장에 따로 적어 두세요.</li><li>YouTube 키는 무료지만 하루 검색 한도(약 100회 호출)가 있어요. 다 쓰면 다음 날 다시 채워지고, 영상 링크 분석은 거의 쓰지 않아요.</li><li>막히면 화면을 캡처해 카카오톡 문의로 보내 주세요.</li></ul></div><div class="ug-btns"><button onclick="ugOpenGuide('yt')">🎬 유튜브 키 발급 가이드 열기</button><button onclick="ugOpenGuide('gm')">🧠 제미나이 키 발급 가이드 열기</button></div></div></details><details class="ug"><summary><span class="ug-ico">🛍️</span><span class="ug-tt"><b>쇼핑 쇼츠아이템 검색</b><small>키워드로 직접 찾기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>유튜브에서 내가 원하는 키워드로 쇼츠·영상을 찾고, 조회수 속도(VPH)와 쿠팡 링크 여부 등을 한눈에 보여주는 메인 검색 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>위쪽 <b>카테고리</b>(주방/패션/뷰티 등)를 고르거나 <b>전체</b>를 그대로 두세요.</li><li>검색창에 키워드를 쓰고 <b>검색</b>을 누르세요. (예: 다이소 추천템) 키워드가 막막하면 <b>추천 키워드</b>·<b>실시간 인기</b> 칩을 누르면 바로 검색돼요.</li><li><b>세부 검색</b>에서 수집 기준·개수·기간을 조절하고 <b>🔄 재검색</b>을 누르면 다시 찾아줘요.</li><li>결과 위의 <b>정렬 · VPH 구간 · 조회수 구간 · 영상 형식 · 쿠팡링크 있는 영상만</b>으로 목록을 걸러 보세요.</li><li>카드를 열어 <b>제품 분석 · 원본 찾기 · 쿠팡 · 채팅</b> 버튼, <b>⭐ 즐겨찾기</b>, <b>📦 배치 추적</b>을 사용하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li><b>VPH</b>는 "시간당 조회수"예요. 높을수록 지금 알고리즘이 밀어주는 영상입니다.</li><li><b>♻️ 이미 많이 올라온 소재 거르기</b>: 같은 원본으로 만든 쇼츠가 이미 많으면 재사용 콘텐츠로 걸릴 수 있어요. 기준(10·50·100개 이상)을 고르면 그런 소재를 숨겨 줘요. (API를 더 씁니다)</li><li><b>📜 과거 떡상</b>: 올라온 지 1~3년 된 영상 중 100만+ 같은 큰 조회수 영상만 찾아줘요. (3년 이내만 검색) 오래돼도 검증된 소재를 새로 만들 때 좋아요.</li><li><b>🔗 영상 URL로 분석</b>: 이미 아는 영상 링크를 붙여넣으면 검색 결과와 똑같은 카드로 분석해요.</li><li><b>🛡️ CC 재사용 허용 영상만</b>을 켜면 재편집이 허용된 영상만 보여요 (출처 표기 필수).</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📈</span><span class="ug-tt"><b>떡상 쇼츠아이템 검색</b><small>지금 뜨는 영상 찾기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>관심 주제·영상 타입·구독자 구간을 골라, 구독자는 적은데 조회수가 크게 터진 영상을 찾아주는 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li><b>관심 주제</b>(건강, 영화/드라마, 뷰티, 요리 등)를 고르세요.</li><li><b>영상 타입</b>(전체·쇼츠·롱폼)과 <b>구독자 구간</b>(예: 0~1만명 급성장)을 고르세요.</li><li><b>검색</b>을 누르면 조건에 맞는 영상이 카드로 나와요. <b>📈 실시간 급상승 영상</b> 버튼은 지금 유튜브에서 가장 핫한 영상을 바로 가져와요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>구독자 구간을 작게(0~1만) 하면 "작은 채널인데 크게 터진" 영상을 찾기 좋아요.</li><li>마음에 드는 영상은 ⭐로 저장해 두세요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">⭐</span><span class="ug-tt"><b>즐겨찾기</b><small>마음에 든 영상 모아보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>검색 결과 카드에서 별(⭐)을 눌러 저장한 영상을 한곳에서 다시 보는 보관함이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>검색·떡상 화면에서 영상 카드의 <b>⭐</b>를 누르세요.</li><li>왼쪽 메뉴 <b>⭐ 즐겨찾기</b>에서 저장한 영상을 다시 보세요.</li><li>필요 없으면 별을 다시 눌러 해제하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>벤치마킹할 영상을 5~10개 모아 두고 꾸준히 보면 감이 빨리 늘어요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📜</span><span class="ug-tt"><b>검색 기록</b><small>내가 찾았던 검색 다시 보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>이전에 검색한 키워드와 결과를 다시 열어보는 곳이에요. (기능을 순차적으로 열고 있어요.)</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>📜 검색 기록</b>을 누르세요.</li><li>이전 검색을 눌러 결과를 다시 확인하세요.</li></ol></div></details><details class="ug"><summary><span class="ug-ico">🌅</span><span class="ug-tt"><b>오늘의 발굴</b><small>매일 아침 자동 수집</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>키워드를 미리 등록해 두면, 매일 아침 첫 방문 때 급상승 영상을 자동으로 모아 리포트로 보여줘요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li><b>+ 키워드 추가</b>로 추적할 키워드를 넣으세요 (최대 10개). 키워드마다 최소 조회수와 기간을 정할 수 있어요.</li><li><b>자동 실행 시간</b>을 정하세요. 그 시간 이후 첫 방문 때 자동 실행돼요.</li><li><b>🚀 지금 발굴 시작</b>을 누르면 바로 수집돼요. 아래 <b>오늘의 발굴 리포트</b>에서 결과를 확인하세요.</li><li>(선택) 이메일 알림을 켜면 결과를 메일로도 받아요. 처음 한 번 인증 메일의 확인을 눌러야 해요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>키워드는 "제품 카테고리 + 효능"처럼 구체적일수록 좋아요.</li><li>발굴 때마다 API가 쓰이니 키워드 수를 적당히 정하세요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">👁️</span><span class="ug-tt"><b>채널 감시</b><small>경쟁 채널 새 영상 감지</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>잘 되는 채널을 등록해 두면 새 영상이 올라올 때 빠르게 알려줘서, 트렌드가 포화되기 전에 먼저 올라탈 수 있어요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>👁️ 채널 감시</b>를 누르세요.</li><li>감시할 채널을 추가하세요.</li><li>새 영상이 올라오면 목록에 표시돼요. 눌러서 바로 확인하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>본받고 싶은 채널 몇 개만 꾸준히 보는 게 효율적이에요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📦</span><span class="ug-tt"><b>배치 추적</b><small>영상을 날짜별로 모아 보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>검색 결과에서 📦를 누른 영상이 날짜별로 쌓여서, 조회수 변화를 비교하고 CSV로 저장할 수 있는 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>검색 결과 카드의 <b>📦</b> 버튼을 누르세요.</li><li>왼쪽 메뉴 <b>📦 배치 추적</b>에서 날짜별로 쌓인 영상을 확인하세요.</li><li><b>💾 CSV</b>로 내려받거나 <b>🗑 전체삭제</b>로 비울 수 있어요. (삭제하면 되돌릴 수 없어요.)</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>같은 영상을 며칠 간격으로 모으면 조회수가 어떻게 늘어나는지 비교할 수 있어요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">💳</span><span class="ug-tt"><b>구독 관리</b><small>이용 기간 · 해지 · 환불</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>내 이용 상태를 확인하고, 해지나 환불 문의를 하는 곳이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>💳 구독 관리</b>를 누르세요.</li><li>남은 이용 기간과 결제 내역을 확인하세요.</li><li>해지·환불·결제 오류는 아래 <b>카카오톡 문의</b>로 연락하시면 빠르게 도와드려요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>처음 가입하면 3일 무료 체험이 먼저 시작돼요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">💬</span><span class="ug-tt"><b>카카오톡 고객문의</b><small>막히면 바로 물어보세요</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>읽어봐도 어려운 부분은 부담 없이 물어보세요. 화면을 캡처해서 보내주시면 가장 빨라요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>아래 <b>💛 카카오톡으로 문의하기</b> 버튼을 누르세요.</li><li>카카오톡 채팅창이 열리면 궁금한 점과 화면 캡처를 보내 주세요.</li></ol></div></details></div>
+  <div class="ug-list"><details class="ug" open><summary><span class="ug-ico">🔑</span><span class="ug-tt"><b>API 키 설정</b><small>처음 한 번만 하면 됩니다 · 무료</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>서치큐브가 유튜브·AI(제미나이)를 쓰려면 구글이 무료로 주는 <b>내 전용 열쇠(API 키)</b> 2개가 필요해요. 카드 등록도, 제미나이 구독도 필요 없습니다.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>🔑 API 키 설정</b>을 누르세요.</li><li>각 칸 옆 <b>"발급 가이드"</b> 버튼을 누르면 그림과 함께 한 단계씩 안내해 드려요. 아래 버튼으로 바로 열 수도 있어요.</li><li>받은 열쇠(<code>AIzaSy</code>로 시작)를 칸에 <b>붙여넣고 저장</b>하세요. YouTube 키와 Gemini 키는 <b>서로 다른 칸</b>입니다.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>열쇠는 내 브라우저에만 저장돼요. 다른 컴퓨터·휴대폰에서 접속하면 다시 넣어야 합니다. 메모장에 따로 적어 두세요.</li><li>YouTube 키는 무료지만 하루 검색 한도(약 100회 호출)가 있어요. 다 쓰면 다음 날 다시 채워지고, 영상 링크 분석은 거의 쓰지 않아요.</li><li>막히면 화면을 캡처해 카카오톡 문의로 보내 주세요.</li></ul></div><div class="ug-btns"><button onclick="ugOpenGuide('yt')">🎬 유튜브 키 발급 가이드 열기</button><button onclick="ugOpenGuide('gm')">🧠 제미나이 키 발급 가이드 열기</button></div></div></details><details class="ug"><summary><span class="ug-ico">🛍️</span><span class="ug-tt"><b>쇼핑 쇼츠아이템 검색</b><small>키워드로 직접 찾기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>유튜브에서 내가 원하는 키워드로 쇼츠·영상을 찾고, 조회수 속도(VPH)와 쿠팡 링크 여부 등을 한눈에 보여주는 메인 검색 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>위쪽 <b>카테고리</b>(주방/패션/뷰티 등)를 고르거나 <b>전체</b>를 그대로 두세요.</li><li>검색창에 키워드를 쓰고 <b>검색</b>을 누르세요. (예: 다이소 추천템) 키워드가 막막하면 <b>추천 키워드</b>·<b>실시간 인기</b> 칩을 누르면 바로 검색돼요.</li><li><b>세부 검색</b>에서 수집 기준·개수·기간을 조절하고 <b>🔄 재검색</b>을 누르면 다시 찾아줘요.</li><li>결과 위의 <b>정렬 · VPH 구간 · 조회수 구간 · 영상 형식 · 쿠팡링크 있는 영상만</b>으로 목록을 걸러 보세요.</li><li>카드를 열어 <b>제품 분석 · 원본 찾기 · 쿠팡 · 채팅</b> 버튼, <b>⭐ 즐겨찾기</b>, <b>📦 배치 추적</b>을 사용하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li><b>VPH</b>는 "시간당 조회수"예요. 높을수록 지금 알고리즘이 밀어주는 영상입니다.</li><li><b>♻️ 이미 많이 올라온 소재 거르기</b>: 같은 원본으로 만든 쇼츠가 이미 많으면 재사용 콘텐츠로 걸릴 수 있어요. 기준(10·50·100개 이상)을 고르면 그런 소재를 숨겨 줘요. (API를 더 씁니다)</li><li><b>📜 과거 떡상</b>: 올라온 지 1~3년 된 영상 중 100만+ 같은 큰 조회수 영상만 찾아줘요. (3년 이내만 검색) 오래돼도 검증된 소재를 새로 만들 때 좋아요.</li><li><b>🔗 영상 URL로 분석</b>: 이미 아는 영상 링크를 붙여넣으면 검색 결과와 똑같은 카드로 분석해요.</li><li><b>🛡️ CC 재사용 허용 영상만</b>을 켜면 재편집이 허용된 영상만 보여요 (출처 표기 필수).</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📈</span><span class="ug-tt"><b>떡상 쇼츠아이템 검색</b><small>지금 뜨는 영상 찾기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>관심 주제·영상 타입·구독자 구간을 골라, 구독자는 적은데 조회수가 크게 터진 영상을 찾아주는 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li><b>관심 주제</b>(건강, 영화/드라마, 뷰티, 요리 등)를 고르세요.</li><li><b>영상 타입</b>(전체·쇼츠·롱폼)과 <b>구독자 구간</b>(예: 0~1만명 급성장)을 고르세요.</li><li><b>검색</b>을 누르면 조건에 맞는 영상이 카드로 나와요. <b>📈 실시간 급상승 영상</b> 버튼은 지금 유튜브에서 가장 핫한 영상을 바로 가져와요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>구독자 구간을 작게(0~1만) 하면 "작은 채널인데 크게 터진" 영상을 찾기 좋아요.</li><li>마음에 드는 영상은 ⭐로 저장해 두세요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">⭐</span><span class="ug-tt"><b>즐겨찾기</b><small>마음에 든 영상 모아보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>검색 결과 카드에서 별(⭐)을 눌러 저장한 영상을 한곳에서 다시 보는 보관함이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>검색·떡상 화면에서 영상 카드의 <b>⭐</b>를 누르세요.</li><li>왼쪽 메뉴 <b>⭐ 즐겨찾기</b>에서 저장한 영상을 다시 보세요.</li><li>필요 없으면 별을 다시 눌러 해제하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>벤치마킹할 영상을 5~10개 모아 두고 꾸준히 보면 감이 빨리 늘어요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📜</span><span class="ug-tt"><b>검색 기록</b><small>내가 찾았던 검색 다시 보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>이전에 검색한 키워드와 결과를 다시 열어보는 곳이에요. (기능을 순차적으로 열고 있어요.)</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>📜 검색 기록</b>을 누르세요.</li><li>이전 검색을 눌러 결과를 다시 확인하세요.</li></ol></div></details><details class="ug"><summary><span class="ug-ico">🌅</span><span class="ug-tt"><b>오늘의 발굴</b><small>매일 아침 자동 수집</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>키워드를 미리 등록해 두면, 매일 아침 첫 방문 때 급상승 영상을 자동으로 모아 리포트로 보여줘요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li><b>+ 키워드 추가</b>로 추적할 키워드를 넣으세요 (최대 10개). 키워드마다 최소 조회수와 기간을 정할 수 있어요.</li><li><b>자동 실행 시간</b>을 정하세요. 그 시간 이후 첫 방문 때 자동 실행돼요.</li><li><b>🚀 지금 발굴 시작</b>을 누르면 바로 수집돼요. 아래 <b>오늘의 발굴 리포트</b>에서 결과를 확인하세요.</li><li>(선택) 이메일 알림을 켜면 결과를 메일로도 받아요. 처음 한 번 인증 메일의 확인을 눌러야 해요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>키워드는 "제품 카테고리 + 효능"처럼 구체적일수록 좋아요.</li><li>발굴 때마다 API가 쓰이니 키워드 수를 적당히 정하세요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">👁️</span><span class="ug-tt"><b>채널 감시</b><small>경쟁 채널 새 영상 감지</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>잘 되는 채널을 등록해 두면 새 영상이 올라올 때 빠르게 알려줘서, 트렌드가 포화되기 전에 먼저 올라탈 수 있어요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>👁️ 채널 감시</b>를 누르세요.</li><li>감시할 채널을 추가하세요.</li><li>새 영상이 올라오면 목록에 표시돼요. 눌러서 바로 확인하세요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>본받고 싶은 채널 몇 개만 꾸준히 보는 게 효율적이에요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">📦</span><span class="ug-tt"><b>배치 추적</b><small>영상을 날짜별로 모아 보기</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>검색 결과에서 📦를 누른 영상이 날짜별로 쌓여서, 조회수 변화를 비교하고 CSV로 저장할 수 있는 화면이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>검색 결과 카드의 <b>📦</b> 버튼을 누르세요.</li><li>왼쪽 메뉴 <b>📦 배치 추적</b>에서 날짜별로 쌓인 영상을 확인하세요.</li><li><b>💾 CSV</b>로 내려받거나 <b>🗑 전체삭제</b>로 비울 수 있어요. (삭제하면 되돌릴 수 없어요.)</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>같은 영상을 며칠 간격으로 모으면 조회수가 어떻게 늘어나는지 비교할 수 있어요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">💳</span><span class="ug-tt"><b>구독 관리</b><small>이용 기간 · 해지 · 환불</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>내 이용 상태를 확인하고, 해지나 환불 문의를 하는 곳이에요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>왼쪽 메뉴 <b>💳 구독 관리</b>를 누르세요.</li><li>남은 이용 기간과 결제 내역을 확인하세요.</li><li>이용권을 사려면 <b>이용권 구매</b>에서 1개월권/연간 이용권을 고르고, 안내된 <b>토스뱅크 계좌로 입금</b> 후 <b>입금 신청하기</b>를 누르세요. 입금이 확인되면 바로 켜져요. <b>현금영수증</b>도 신청할 수 있어요.</li><li>해지·환불·결제 오류는 아래 <b>카카오톡 문의</b>로 연락하시면 빠르게 도와드려요.</li></ol><div class="ug-tip"><div class="ug-h">💡 활용 팁</div><ul><li>처음 가입하면 3일 무료 체험이 먼저 시작돼요.</li></ul></div></div></details><details class="ug"><summary><span class="ug-ico">💬</span><span class="ug-tt"><b>카카오톡 고객문의</b><small>막히면 바로 물어보세요</small></span><span class="ug-ch">⌄</span></summary><div class="ug-body"><p>읽어봐도 어려운 부분은 부담 없이 물어보세요. 화면을 캡처해서 보내주시면 가장 빨라요.</p><div class="ug-h">이렇게 사용하세요</div><ol><li>아래 <b>💛 카카오톡으로 문의하기</b> 버튼을 누르세요.</li><li>카카오톡 채팅창이 열리면 궁금한 점과 화면 캡처를 보내 주세요.</li></ol></div></details></div>
   <div class="card pad" style="text-align:center;padding:26px;margin-top:16px">
     <div style="font-size:15px;font-weight:700;color:var(--fg);margin-bottom:8px">💬 읽어봐도 어려운 부분이 있으신가요?</div>
     <div style="font-size:13.5px;color:var(--dim);margin-bottom:16px">부담 없이 카카오톡으로 물어봐 주세요. 기능 건의도 언제나 환영입니다!</div>
@@ -5450,10 +5417,19 @@ body.light .hero-pill{
     <!-- 현재 플랜 -->
     <div class="card pad" id="subscriptionStatusCard">
       <div style="font-size:13.5px;font-weight:700;color:var(--dim);margin-bottom:14px;letter-spacing:.05em">현재 플랜</div>
+      <div id="pendingOrderNotice"></div>
       <div id="subStatusContent" style="text-align:center;padding:20px 0">
         <div style="font-size:36px;margin-bottom:10px">⏳</div>
         <div style="font-size:13.5px;color:var(--dim)">구독 정보를 불러오는 중...</div>
       </div>
+    </div>
+    <!-- 관리자: 입금 확인 -->
+    <div class="card pad" id="adminOrdersCard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:13.5px;font-weight:700;color:var(--dim);letter-spacing:.05em">🛠 입금 확인 (관리자)</div>
+        <button type="button" onclick="MrfAuth.adminRender()" style="padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--dim);font-size:12px;cursor:pointer">새로고침</button>
+      </div>
+      <div id="adminOrdersContent" style="font-size:13px;color:var(--dim)">불러오는 중...</div>
     </div>
     <!-- 결제 내역 -->
     <div class="card pad">
@@ -5469,8 +5445,8 @@ body.light .hero-pill{
       <div style="font-size:13.5px;font-weight:700;color:var(--dim);margin-bottom:14px;letter-spacing:.05em">자주 묻는 질문</div>
       <div style="display:grid;gap:10px">
         <details style="border:1px solid var(--line);border-radius:8px;overflow:hidden">
-          <summary style="padding:13px 16px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--fg);list-style:none;display:flex;justify-content:space-between;align-items:center">언제 청구되나요? <span style="color:var(--dim);font-size:12px">▾</span></summary>
-          <div style="padding:0 16px 13px;font-size:13px;color:var(--dim);line-height:1.7">구독 시작일 기준으로 매월 자동 청구됩니다. 3일 무료 체험 기간이 끝난 후 첫 결제가 이루어집니다.</div>
+          <summary style="padding:13px 16px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--fg);list-style:none;display:flex;justify-content:space-between;align-items:center">어떻게 결제하나요? <span style="color:var(--dim);font-size:12px">▾</span></summary>
+          <div style="padding:0 16px 13px;font-size:13px;color:var(--dim);line-height:1.7">자동으로 청구되지 않아요. 3일 무료체험이 끝난 뒤 계속 쓰고 싶을 때만 이용권을 골라 무통장입금으로 결제하세요. 입금이 확인되면 바로 이용 기간이 시작됩니다.</div>
         </details>
         <details style="border:1px solid var(--line);border-radius:8px;overflow:hidden">
           <summary style="padding:13px 16px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--fg);list-style:none;display:flex;justify-content:space-between;align-items:center">해지하면 언제까지 쓸 수 있나요? <span style="color:var(--dim);font-size:12px">▾</span></summary>
@@ -5897,7 +5873,7 @@ body.light .hero-pill{
     <button class="auth-close" onclick="MrfAuth.closeModal('authSignup')">✕</button>
     <div class="auth-head">
       <img class="mrf-logo-sym auth-logo-brand" alt="서치큐브">
-      <h2 class="auth-title">3일 무료체험 시작</h2>
+      <h2 class="auth-title" id="signupTitle">3일 무료체험 시작</h2>
       <p class="auth-sub">구글 또는 카카오 계정으로 30초 만에 시작하세요.<br>카드 등록 없이 바로 3일간 무료로 이용할 수 있어요.</p>
     </div>
 
@@ -5908,10 +5884,10 @@ body.light .hero-pill{
       </div>
       <div class="aps-row">
         <span class="aps-label">무료체험</span>
-        <span class="aps-val" id="signupTrialLabel">3일 무료 · 이후 월 9,900원</span>
+        <span class="aps-val" id="signupTrialLabel">3일 무료 · 이후 입금하실 때만 결제</span>
       </div>
       <div class="aps-row">
-        <span class="aps-label">첫 결제일</span>
+        <span class="aps-label">결제 방법</span>
         <span class="aps-val big" id="signupFirstBillDate">-</span>
       </div>
     </div>
@@ -5938,60 +5914,67 @@ body.light .hero-pill{
     </div>
 
     <div class="auth-footer-note">
-      카드 등록은 체험이 끝난 뒤 계속 이용하실 때만 진행됩니다<br>
-      언제든지 취소 가능 · 3일 이내 미사용 시 전액 환불
+      결제는 무통장입금(현금)으로만 진행되고 자동결제는 없어요<br>
+      체험 중에는 입금이 필요 없습니다 · 3일 이내 미사용 시 전액 환불
     </div>
   </div>
 </div>
 
-<!-- Step 2: Payment (Card Registration) -->
+<!-- Step 2: Payment (무통장입금) -->
 <div class="auth-overlay" id="authPayment">
-  <div class="auth-modal">
+  <div class="auth-modal" style="max-height:92vh;overflow-y:auto">
     <button class="auth-close" onclick="MrfAuth.closeModal('authPayment')">✕</button>
     <div class="auth-head">
-      <div class="auth-logo">💳</div>
-      <h2 class="auth-title">결제 정보 등록</h2>
-      <p class="auth-sub">지금은 결제되지 않습니다.<br>3일 뒤 첫 결제가 진행됩니다.</p>
+      <div class="auth-logo">🏦</div>
+      <h2 class="auth-title" id="payTitle">무통장입금으로 이용권 구매</h2>
+      <p class="auth-sub" id="paySub">카드 등록 없이, 아래 계좌로 입금하고 신청하세요.<br>입금이 확인되면 바로 이용할 수 있어요.</p>
     </div>
 
-    <div class="auth-plan-summary">
-      <div class="aps-row">
-        <span class="aps-label">이메일</span>
-        <span class="aps-val" id="paymentEmail">-</span>
-      </div>
-      <div class="aps-row">
-        <span class="aps-label">첫 결제일</span>
-        <span class="aps-val" id="paymentFirstDate">-</span>
-      </div>
-      <div class="aps-row">
-        <span class="aps-label">결제 금액</span>
-        <span class="aps-val big" id="paymentAmount">9,900원</span>
+    <div id="payPlanPickWrap" class="auth-field">
+      <label>이용권 선택</label>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="payPick_annual" onclick="MrfAuth.pickPlan('annual')" style="flex:1;padding:12px 8px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--fg);cursor:pointer;text-align:center;font-size:13px;line-height:1.5"><b>연간 이용권</b><br>79,200원<br><span style="color:#22c55e;font-size:11px">월 6,600원 · 4개월 무료</span></button>
+        <button type="button" id="payPick_once" onclick="MrfAuth.pickPlan('once')" style="flex:1;padding:12px 8px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--fg);cursor:pointer;text-align:center;font-size:13px;line-height:1.5"><b>1개월권</b><br>9,900원<br><span style="color:var(--dim);font-size:11px">30일 · 자동갱신 없음</span></button>
       </div>
     </div>
 
-    <div class="auth-field">
-      <label for="cardNumber">카드번호</label>
-      <input type="text" id="cardNumber" class="auth-input" placeholder="1234 5678 9012 3456" maxlength="19" inputmode="numeric">
+    <div class="auth-plan-summary" id="payBankBox">
+      <div class="aps-row"><span class="aps-label">은행</span><span class="aps-val" id="payBankName">토스뱅크</span></div>
+      <div class="aps-row"><span class="aps-label">계좌번호</span><span class="aps-val"><span id="payBankAcct">1002-8712-8884</span> <button type="button" onclick="MrfAuth.copyAccount()" style="margin-left:6px;padding:3px 9px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--accent);font-size:11.5px;font-weight:700;cursor:pointer">복사</button></span></div>
+      <div class="aps-row"><span class="aps-label">예금주</span><span class="aps-val" id="payBankHolder">큐브(CUVE)</span></div>
+      <div class="aps-row"><span class="aps-label">입금액</span><span class="aps-val big" id="payAmount">79,200원</span></div>
     </div>
 
-    <div class="auth-card-row">
+    <div id="payFormWrap">
       <div class="auth-field">
-        <label for="cardExpiry">유효기간 (MM/YY)</label>
-        <input type="text" id="cardExpiry" class="auth-input" placeholder="12/28" maxlength="5" inputmode="numeric">
+        <label for="payDepositor">입금자명</label>
+        <input type="text" id="payDepositor" class="auth-input" placeholder="입금할 때 은행 앱에 찍히는 이름" maxlength="20" autocomplete="off">
       </div>
       <div class="auth-field">
-        <label for="cardCvc">CVC</label>
-        <input type="text" id="cardCvc" class="auth-input" placeholder="•••" maxlength="4" inputmode="numeric">
+        <label for="payReceiptType">현금영수증</label>
+        <select id="payReceiptType" class="auth-input" onchange="MrfAuth.onReceiptType()">
+          <option value="none">신청 안 함</option>
+          <option value="income">소득공제용 (휴대폰번호)</option>
+          <option value="business">지출증빙용 (사업자등록번호)</option>
+        </select>
+        <input type="text" id="payReceiptNum" class="auth-input" inputmode="numeric" autocomplete="off" style="display:none;margin-top:8px" placeholder="">
+      </div>
+      <button class="auth-btn" id="payOrderBtn" onclick="MrfAuth.submitPayment()">📨 입금 신청하기</button>
+      <div class="auth-footer-note">
+        ① 위 계좌로 입금액을 이체 ② <b>입금 신청하기</b> 누르기<br>
+        입금자명이 같아야 확인이 빨라요 · 보통 영업시간 내 확인됩니다<br>
+        현금영수증은 입금 확인 후 신청하신 번호로 발급해 드려요
       </div>
     </div>
 
-    <button class="auth-btn" onclick="MrfAuth.submitPayment()">
-      ✨ 3일 무료로 시작하기
-    </button>
-
-    <div class="auth-footer-note">
-      🔒 카드 정보는 토스페이먼츠가 안전하게 처리합니다<br>
-      <span style="color:var(--accent);font-weight:600">데모 모드: 실제 결제되지 않음 · 아무 숫자나 입력해도 됩니다</span>
+    <div id="payPendingWrap" style="display:none">
+      <div class="auth-plan-summary" id="payPendingInfo"></div>
+      <button class="auth-btn" onclick="MrfAuth.checkOrder()">🔄 입금 확인 상태 새로고침</button>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button type="button" onclick="MrfSupport.openKakao()" style="flex:1;padding:11px;border:none;border-radius:10px;background:#FEE500;color:#191919;font-weight:800;font-size:13px;cursor:pointer">💛 카카오톡 문의</button>
+        <button type="button" onclick="MrfAuth.cancelOrder()" style="flex:1;padding:11px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--dim);font-size:13px;cursor:pointer">신청 취소 / 수정</button>
+      </div>
+      <div class="auth-footer-note">입금이 확인되면 이 창에서 새로고침하거나 서비스를 다시 열면 바로 적용돼요.</div>
     </div>
   </div>
 </div>
@@ -6130,7 +6113,7 @@ body.light .hero-pill{
       <div style="color:var(--fg-dim);margin-bottom:12px">
         1. 앱 내 '구독 관리 → 환불 신청' 버튼 클릭<br>
         2. 환불 신청 접수 확인 이메일 발송<br>
-        3. 3~5 영업일 이내 결제 수단으로 환불 처리<br>
+        3. 3~5 영업일 이내 입금하신 계좌로 환불(계좌이체) 처리<br>
         4. 환불 완료 후 서비스 이용 즉시 중단
       </div>
 
@@ -8645,10 +8628,13 @@ window.MrfAuth = (function(){
   var KEY_USER = 'sc_user_v1';
   var KEY_SUB  = 'sc_sub_v1';
   var KEY_PAYMENTS = 'sc_payments_v1';
+  var KEY_ORDER = 'sc_order_v1';
   var KEY_TOKEN = 'sc_token_v1'; // server session token — accounts now live on the server (KV), this device just caches state
 
   var PRICE_MONTHLY = 9900;
-  var PRICE_ONCE    = 11900;
+  var PRICE_ONCE    = 9900;
+  var PRICE_ANNUAL  = 79200;
+  var BANK = { bank:'토스뱅크', acct:'1002-8712-8884', holder:'큐브(CUVE)' };
   var TRIAL_DAYS    = 3;
 
   // ---------- Server API helpers ----------
@@ -8685,10 +8671,12 @@ window.MrfAuth = (function(){
     }
     _set(KEY_SUB, data.subscription || null);
     _set(KEY_PAYMENTS, data.payments || []);
+    if(Object.prototype.hasOwnProperty.call(data, 'order')) _set(KEY_ORDER, data.order || null);
   }
 
   var pendingPlanType = 'monthly'; // 'monthly' | 'once'
   var pendingIsOAuth = false;
+  var pendingBuy = false; // 로그인 직후 입금 신청 창으로 이어갈지
   var pendingEmail = '';
   var pendingPassword = '';
 
@@ -8836,27 +8824,27 @@ window.MrfAuth = (function(){
 
   // ---------- Signup flow ----------
   function startSignup(planType, viaOAuth){
-    pendingPlanType = planType === 'once' ? 'once' : 'monthly';
+    var paid = planType === 'once' || planType === 'annual';
+    var u = getUser();
+    // 이미 로그인 상태에서 이용권을 고르면 바로 입금 신청 창으로
+    if(paid && u && _token()){
+      pendingEmail = u.email;
+      pendingPlanType = planType;
+      _preparePaymentModal(u.email);
+      return;
+    }
+    pendingPlanType = paid ? planType : 'annual';
+    pendingBuy = paid;
     pendingIsOAuth = !!viaOAuth;
-    var price = pendingPlanType === 'once' ? PRICE_ONCE : PRICE_MONTHLY;
-    var billDate = pendingPlanType === 'once'
-      ? new Date() // 1개월권은 즉시 결제
-      : _addDays(new Date(), TRIAL_DAYS); // 월간은 3일 후 결제
-
-    var planName = pendingPlanType === 'once' ? 'Pro 1개월 이용권 (1회 결제)' : '월간 자동결제';
-    var trialLabel = pendingPlanType === 'once'
-      ? '즉시 결제 · 30일 이용'
-      : TRIAL_DAYS + '일 무료 · 이후 월 ' + price.toLocaleString() + '원';
-    var agreeAmount = pendingPlanType === 'once'
-      ? price.toLocaleString() + '원 1회 결제'
-      : price.toLocaleString() + '원 월간 자동결제';
-
+    var planName = planType === 'annual' ? 'Pro 연간 이용권 (79,200원)'
+                 : planType === 'once' ? 'Pro 1개월 이용권 (9,900원)'
+                 : '3일 무료체험';
+    var trialLabel = paid ? '가입 후 입금 안내 → 입금 확인되면 바로 이용' : '3일 무료 · 이후 입금하실 때만 결제';
     var $ = function(id){ return document.getElementById(id); };
+    if($('signupTitle')) $('signupTitle').textContent = paid ? '가입하고 이용권 신청' : '3일 무료체험 시작';
     if($('signupPlanName')) $('signupPlanName').textContent = planName;
     if($('signupTrialLabel')) $('signupTrialLabel').textContent = trialLabel;
-    if($('signupFirstBillDate')) $('signupFirstBillDate').textContent = _fmtDate(billDate);
-    if($('signupAgreeAmount')) $('signupAgreeAmount').textContent = agreeAmount;
-
+    if($('signupFirstBillDate')) $('signupFirstBillDate').textContent = '무통장입금 · 현금영수증 가능';
     openModal('authSignup');
   }
 
@@ -8869,92 +8857,189 @@ window.MrfAuth = (function(){
     return true;
   }
 
-  function _preparePaymentModal(email){
-    var price = pendingPlanType === 'once' ? PRICE_ONCE : PRICE_MONTHLY;
-    var billDate = pendingPlanType === 'once' ? new Date() : _addDays(new Date(), TRIAL_DAYS);
-
-    var $ = function(id){ return document.getElementById(id); };
-    if($('paymentEmail')) $('paymentEmail').textContent = email || '';
-    if($('paymentFirstDate')) $('paymentFirstDate').textContent = _fmtDate(billDate);
-    if($('paymentAmount')) $('paymentAmount').textContent = price.toLocaleString() + '원';
-
-    // Card input formatting
-    var cardNum = $('cardNumber');
-    cardNum.oninput = function(){
-      var v = this.value.replace(/\D/g,'').slice(0,16);
-      var groups = v.match(/.{1,4}/g);
-      this.value = groups ? groups.join(' ') : '';
-    };
-    var expiry = $('cardExpiry');
-    expiry.oninput = function(){
-      var v = this.value.replace(/\D/g,'').slice(0,4);
-      if(v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
-      this.value = v;
-    };
-    var cvc = $('cardCvc');
-    cvc.oninput = function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); };
-
-    openModal('authPayment');
-    setTimeout(function(){ cardNum.focus(); }, 100);
+  // ---------- 무통장입금 ----------
+  function _esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function getOrder(){ var o = _get(KEY_ORDER); return (o && o.status === 'pending') ? o : null; }
+  function _planAmount(t){ return t === 'once' ? PRICE_ONCE : PRICE_ANNUAL; }
+  function _receiptLabel(r){
+    if(!r || r.type === 'none' || !r.type) return '신청 안 함';
+    return (r.type === 'income' ? '소득공제용 ' : '지출증빙용 ') + _esc(r.number);
   }
-
-  function submitPayment(){
-    // Demo: accept any input, don't actually process a real charge — this
-    // just registers the plan. (Real card data is never sent anywhere; the
-    // number here never leaves the browser except its last 4 digits.)
-    var card = document.getElementById('cardNumber').value.replace(/\s/g,'');
-    if(card.length < 4){
-      alert('카드번호를 입력해주세요. (데모 모드: 아무 숫자나 입력 가능)');
-      return;
+  function pickPlan(t){ pendingPlanType = t === 'once' ? 'once' : 'annual'; _renderPayModal(); }
+  function onReceiptType(){
+    var t = document.getElementById('payReceiptType').value;
+    var n = document.getElementById('payReceiptNum');
+    if(t === 'none'){ n.style.display = 'none'; n.value = ''; return; }
+    n.style.display = 'block';
+    n.placeholder = t === 'income' ? '휴대폰번호 (숫자만, 예: 01012345678)' : '사업자등록번호 10자리 (숫자만)';
+    n.maxLength = t === 'income' ? 11 : 10;
+    n.focus();
+  }
+  function _renderPayModal(){
+    var $ = function(id){ return document.getElementById(id); };
+    var o = getOrder();
+    var t = o ? o.planType : (pendingPlanType === 'once' ? 'once' : 'annual');
+    var amt = o ? o.amount : _planAmount(t);
+    if($('payAmount')) $('payAmount').textContent = Number(amt).toLocaleString() + '원';
+    if($('payBankName')) $('payBankName').textContent = BANK.bank;
+    if($('payBankAcct')) $('payBankAcct').textContent = BANK.acct;
+    if($('payBankHolder')) $('payBankHolder').textContent = BANK.holder;
+    ['annual','once'].forEach(function(k){
+      var b = $('payPick_' + k); if(!b) return;
+      b.style.borderColor = (k === t) ? 'var(--accent)' : 'var(--line)';
+      b.style.background = (k === t) ? 'rgba(176,55,55,.12)' : 'transparent';
+    });
+    if($('payFormWrap')) $('payFormWrap').style.display = o ? 'none' : 'block';
+    if($('payPlanPickWrap')) $('payPlanPickWrap').style.display = o ? 'none' : 'block';
+    if($('payPendingWrap')) $('payPendingWrap').style.display = o ? 'block' : 'none';
+    if($('payTitle')) $('payTitle').textContent = o ? '입금 확인 중이에요' : '무통장입금으로 이용권 구매';
+    if($('paySub')) $('paySub').innerHTML = o
+      ? '신청이 접수됐어요. 아직 입금 전이라면 아래 계좌로<br><b>입금액</b>을 보내 주세요. 확인되면 바로 켜져요.'
+      : '카드 등록 없이, 아래 계좌로 입금하고 신청하세요.<br>입금이 확인되면 바로 이용할 수 있어요.';
+    if(o && $('payPendingInfo')){
+      $('payPendingInfo').innerHTML =
+        '<div class="aps-row"><span class="aps-label">이용권</span><span class="aps-val">' + _esc(o.planName) + '</span></div>' +
+        '<div class="aps-row"><span class="aps-label">입금자명</span><span class="aps-val">' + _esc(o.depositor) + '</span></div>' +
+        '<div class="aps-row"><span class="aps-label">현금영수증</span><span class="aps-val">' + _receiptLabel(o.receipt) + '</span></div>' +
+        '<div class="aps-row"><span class="aps-label">신청 시각</span><span class="aps-val">' + _esc(new Date(o.createdAt).toLocaleString('ko-KR')) + '</span></div>';
     }
-    var cardLast4 = card.slice(-4);
-    var btn = document.querySelector('#authPayment .auth-btn');
-    if(btn){ btn.disabled = true; btn.textContent = '처리 중...'; }
-
-    // Accounts are Google/Kakao only now — the user is always already logged
-    // in (via social auth) by the time they reach card registration, so this
-    // just tells the server to start/renew the plan on their existing account.
+  }
+  function _preparePaymentModal(email){
+    if(pendingPlanType !== 'once' && pendingPlanType !== 'annual') pendingPlanType = 'annual';
+    var u = getUser();
+    var dep = document.getElementById('payDepositor');
+    if(dep && !dep.value && u && u.name) dep.value = u.name;
+    _renderPayModal();
+    openModal('authPayment');
+    refreshFromServer().then(_renderPayModal); // 그 사이 승인됐는지 조용히 확인
+  }
+  function copyAccount(){
+    var raw = BANK.acct.replace(/\D/g, '');
+    var done = function(){ if(typeof toast === 'function') toast('계좌번호를 복사했어요 📋'); };
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(raw).then(done, function(){ prompt('계좌번호를 복사하세요', raw); }); return; }
+    } catch(e){}
+    prompt('계좌번호를 복사하세요', raw);
+  }
+  function submitPayment(){
+    var $ = function(id){ return document.getElementById(id); };
     if(!_token()){
       alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
-      if(btn){ btn.disabled = false; btn.textContent = '✨ 3일 무료로 시작하기'; }
-      closeModal('authPayment');
-      openModal('authLogin');
-      return;
+      closeModal('authPayment'); openModal('authLogin'); return;
     }
-
-    _api('/api/subscription', { body: { action: 'start', planType: pendingPlanType, cardLast4: cardLast4 } }).then(function(data){
+    var dep = ($('payDepositor').value || '').trim();
+    if(dep.length < 2){ alert('입금자명을 입력해주세요.\n은행 앱에서 입금할 때 보내는 분 이름과 같아야 확인이 빨라요.'); $('payDepositor').focus(); return; }
+    var rt = $('payReceiptType').value;
+    var rn = ($('payReceiptNum').value || '').replace(/\D/g, '');
+    if(rt === 'income' && !/^01\d{8,9}$/.test(rn)){ alert('현금영수증을 받을 휴대폰번호를 정확히 입력해주세요.\n(예: 01012345678)'); return; }
+    if(rt === 'business' && !/^\d{10}$/.test(rn)){ alert('사업자등록번호 10자리를 숫자로 입력해주세요.'); return; }
+    var btn = $('payOrderBtn');
+    if(btn){ btn.disabled = true; btn.textContent = '접수 중...'; }
+    _api('/api/subscription', { body: { action: 'order', planType: pendingPlanType === 'once' ? 'once' : 'annual', depositor: dep, receipt: { type: rt, number: rn } } }).then(function(data){
       _applyServerState(data);
-      var sub = data.subscription;
-
-      closeModal('authPayment');
-
-      // Populate success modal
-      var $ = function(id){ return document.getElementById(id); };
-      if($('successEmail')) $('successEmail').textContent = pendingEmail;
-      if(sub && sub.plan === 'once'){
-        if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.periodEnd) + '까지';
-        if($('successBillDate')) $('successBillDate').textContent = '자동갱신 없음';
-      } else if(sub && sub.status === 'trial'){
-        if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.trialEnd);
-        if($('successBillDate')) $('successBillDate').textContent = _fmtDate(sub.trialEnd);
-      } else if(sub){
-        if($('successTrialEnd')) $('successTrialEnd').textContent = _fmtDate(sub.periodEnd) + '까지';
-        if($('successBillDate')) $('successBillDate').textContent = _fmtDate(sub.periodEnd);
-      }
-
-      openModal('authSuccess');
+      _renderPayModal();
       updateAllUI();
+      if(typeof toast === 'function') toast('입금 신청이 접수됐어요 🏦');
     }).catch(function(err){
       if(err.status === 401){
         alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
-        closeModal('authPayment');
-        openModal('authLogin');
+        closeModal('authPayment'); openModal('authLogin');
       } else {
-        alert(err.message || '결제 등록에 실패했습니다. 다시 시도해주세요.');
+        alert(err.message || '신청에 실패했습니다. 잠시 후 다시 시도해주세요.');
       }
     }).finally(function(){
-      if(btn){ btn.disabled = false; btn.textContent = '✨ 3일 무료로 시작하기'; }
+      if(btn){ btn.disabled = false; btn.textContent = '📨 입금 신청하기'; }
     });
+  }
+  function cancelOrder(){
+    if(!confirm('입금 신청을 취소할까요?\n이미 입금하셨다면 취소하지 말고 카카오톡으로 문의해 주세요.')) return;
+    _api('/api/subscription', { body: { action: 'cancelOrder' } }).then(function(data){
+      _applyServerState(data);
+      _renderPayModal();
+      updateAllUI();
+    }).catch(function(err){ alert(err.message || '취소에 실패했습니다.'); });
+  }
+  function checkOrder(){
+    refreshFromServer().then(function(){
+      _renderPayModal();
+      var st = getStatus();
+      if(!getOrder() && (st === 'once' || st === 'active')){
+        closeModal('authPayment');
+        if(typeof toast === 'function') toast('입금이 확인돼 이용권이 적용됐어요 🎉');
+      } else if(typeof toast === 'function'){
+        toast('아직 입금 확인 전이에요. 조금만 기다려 주세요');
+      }
+    });
+  }
+  function renderOrderNotice(){
+    var el = document.getElementById('pendingOrderNotice');
+    if(!el) return;
+    var o = getOrder();
+    if(!o){ el.innerHTML = ''; return; }
+    el.innerHTML = '<div style="margin:0 0 14px;padding:12px 14px;border:1px solid var(--accent);border-radius:10px;background:rgba(176,55,55,.08);font-size:13px;line-height:1.6;color:var(--fg)">⏳ <b>입금 확인 중</b> · ' + _esc(o.planName) + ' ' + Number(o.amount).toLocaleString() + '원 (입금자명 ' + _esc(o.depositor) + ')<br><a href="#" onclick="event.preventDefault();MrfAuth.unifiedStart()" style="color:var(--accent);font-weight:700">입금 안내 다시 보기 →</a></div>';
+  }
+
+  // ---------- 관리자: 입금 확인 ----------
+  var _adminOrders = [];
+  function _isAdminSub(){ var s = getSubscription(); return !!(s && s.plan === 'admin'); }
+  function _adminRow(o, mode){
+    var r = o.receipt || {};
+    var btns = '';
+    if(mode === 'pending'){
+      btns = '<button type="button" onclick="MrfAuth.adminAct(\'adminApprove\',\'' + _esc(o.id) + '\')" style="padding:7px 12px;border:none;border-radius:8px;background:#22c55e;color:#fff;font-weight:800;font-size:12.5px;cursor:pointer">입금 확인 · 승인</button> ' +
+             '<button type="button" onclick="MrfAuth.adminAct(\'adminReject\',\'' + _esc(o.id) + '\')" style="padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--dim);font-size:12.5px;cursor:pointer">거절</button>';
+    } else if(mode === 'receipt'){
+      btns = '<button type="button" onclick="MrfAuth.adminAct(\'adminReceipt\',\'' + _esc(o.id) + '\',true)" style="padding:7px 12px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:800;font-size:12.5px;cursor:pointer">현금영수증 발급 완료</button>';
+    }
+    var stTxt = o.status === 'approved' ? '승인됨' : (o.status === 'rejected' ? '거절됨' : '대기');
+    return '<div style="padding:12px 0;border-bottom:1px solid var(--line)">' +
+      '<div style="font-weight:700;color:var(--fg)">' + _esc(o.planName) + ' · ' + Number(o.amount).toLocaleString() + '원 <span style="font-weight:500;color:var(--dim);font-size:12px">(' + stTxt + ')</span></div>' +
+      '<div style="margin-top:3px;font-size:12.5px;color:var(--dim);line-height:1.7">' + _esc(o.email) + (o.name ? ' · ' + _esc(o.name) : '') +
+      '<br>입금자명 <b style="color:var(--fg)">' + _esc(o.depositor) + '</b> · 현금영수증 ' + _receiptLabel(r) +
+      '<br>' + _esc(new Date(o.createdAt).toLocaleString('ko-KR')) + '</div>' +
+      (btns ? '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">' + btns + '</div>' : '') + '</div>';
+  }
+  function _adminDraw(){
+    var box = document.getElementById('adminOrdersContent');
+    if(!box) return;
+    var pend = _adminOrders.filter(function(o){ return o.status === 'pending'; });
+    var rcpt = _adminOrders.filter(function(o){ return o.status === 'approved' && o.receipt && o.receipt.type && o.receipt.type !== 'none' && !o.receiptDone; });
+    var rest = _adminOrders.filter(function(o){ return o.status !== 'pending' && rcpt.indexOf(o) < 0; }).slice(0, 5);
+    var h = '<div style="font-weight:800;color:var(--fg);margin:2px 0 4px">입금 대기 ' + pend.length + '건</div>';
+    h += pend.length ? pend.map(function(o){ return _adminRow(o, 'pending'); }).join('') : '<div style="padding:10px 0">대기 중인 신청이 없어요.</div>';
+    if(rcpt.length){
+      h += '<div style="font-weight:800;color:var(--fg);margin:16px 0 4px">현금영수증 발급 필요 ' + rcpt.length + '건 <span style="font-weight:500;color:var(--dim);font-size:12px">(홈택스에서 발급 후 완료 처리)</span></div>' + rcpt.map(function(o){ return _adminRow(o, 'receipt'); }).join('');
+    }
+    if(rest.length){
+      h += '<div style="font-weight:800;color:var(--fg);margin:16px 0 4px">최근 처리</div>' + rest.map(function(o){ return _adminRow(o, ''); }).join('');
+    }
+    box.innerHTML = h;
+  }
+  function adminRender(){
+    var card = document.getElementById('adminOrdersCard');
+    if(!card) return;
+    if(!_isAdminSub()){ card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    var box = document.getElementById('adminOrdersContent');
+    if(box) box.textContent = '불러오는 중...';
+    _api('/api/subscription', { body: { action: 'adminList' } }).then(function(d){
+      _adminOrders = d.orders || [];
+      _adminDraw();
+    }).catch(function(e){ if(box) box.textContent = e.message || '불러오지 못했어요.'; });
+  }
+  function adminAct(act, id, done){
+    var body = { action: act, id: id };
+    if(act === 'adminApprove' && !confirm('입금액이 확인됐나요?\n승인하면 바로 이용권이 켜집니다.')) return;
+    if(act === 'adminReject'){
+      var why = prompt('거절 사유 (선택, 고객에게 보이지는 않아요)', '');
+      if(why === null) return;
+      body.reason = why;
+    }
+    if(act === 'adminReceipt') body.done = done !== false;
+    _api('/api/subscription', { body: body }).then(function(){
+      if(typeof toast === 'function') toast('처리했어요 ✅');
+      adminRender();
+    }).catch(function(e){ alert(e.message || '처리에 실패했습니다.'); });
   }
 
   // ---------- Login ----------
@@ -8995,7 +9080,8 @@ window.MrfAuth = (function(){
       closeModal('authSignup');
       updateAllUI();
       setTimeout(function(){
-        if(window.MrfRouter) MrfRouter.go('app');
+        if(pendingBuy && data.user){ pendingBuy = false; pendingEmail = data.user.email; _preparePaymentModal(data.user.email); }
+        else if(window.MrfRouter) MrfRouter.go('app');
         if(typeof toast==='function') toast(data.isNew ? 'Google 계정으로 가입됐어요 🎉' : 'Google 계정으로 로그인됐어요 ✅');
       }, 200);
     }).catch(function(err){
@@ -9104,7 +9190,8 @@ window.MrfAuth = (function(){
       closeModal('authSignup');
       updateAllUI();
       setTimeout(function(){
-        if(window.MrfRouter) MrfRouter.go('app');
+        if(pendingBuy && data.user){ pendingBuy = false; pendingEmail = data.user.email; _preparePaymentModal(data.user.email); }
+        else if(window.MrfRouter) MrfRouter.go('app');
         if(typeof toast==='function') toast(data.isNew ? '카카오 계정으로 가입됐어요 🎉' : '카카오 계정으로 로그인됐어요 ✅');
       }, 200);
     }).catch(function(err){
@@ -9191,7 +9278,7 @@ window.MrfAuth = (function(){
     if(tok){ _api('/api/logout', { body: {} }).catch(function(){}); }
     _del(KEY_USER);
     _del(KEY_SUB);
-    _del(KEY_PAYMENTS);
+    _del(KEY_PAYMENTS); _del(KEY_ORDER);
     _setToken(null);
     updateAllUI();
     if(window.MrfRouter) MrfRouter.go('landing');
@@ -9405,7 +9492,7 @@ window.MrfAuth = (function(){
       var pct = Math.max(0, Math.min(100, (daysLeft / TRIAL_DAYS) * 100));
       html = '<div class="sub-card">' +
         '<div class="sub-card-title"><span class="sub-icon">🎁</span>무료체험 중</div>' +
-        '<div class="sub-card-status"><b>' + daysLeft + '일</b> 남음 · ' + _fmtShort(sub.trialEnd) + ' 첫 결제</div>' +
+        '<div class="sub-card-status"><b>' + daysLeft + '일</b> 남음 · ' + _fmtShort(sub.trialEnd) + ' 체험 종료</div>' +
         '<div class="sub-card-progress"><div class="sub-card-progress-bar" style="width:' + pct + '%"></div></div>' +
         '<button class="sub-card-btn secondary" onclick="MrfAuth.startCancel()">구독 관리</button>' +
       '</div>';
@@ -9429,15 +9516,15 @@ window.MrfAuth = (function(){
     } else if(status === 'once'){
       var d2 = getPeriodDaysLeft();
       html = '<div class="sub-card">' +
-        '<div class="sub-card-title"><span class="sub-icon">📅</span>1개월 이용권</div>' +
+        '<div class="sub-card-title"><span class="sub-icon">📅</span>' + (sub.plan === 'annual' ? '연간 이용권' : '1개월 이용권') + '</div>' +
         '<div class="sub-card-status"><b>' + _fmtShort(sub.periodEnd) + '</b>까지 (' + d2 + '일 남음)</div>' +
-        '<button class="sub-card-btn secondary" onclick="MrfAuth.startSignup()">월간 구독 전환</button>' +
+        '<button class="sub-card-btn secondary" onclick="MrfAuth.unifiedStart()">이용권 연장하기</button>' +
       '</div>';
     } else if(status === 'expired'){
       html = '<div class="sub-card sub-free">' +
         '<div class="sub-card-title"><span class="sub-icon">💫</span>Free 플랜</div>' +
         '<div class="sub-card-status">구독이 만료되었어요<br>다시 Pro로 돌아오세요</div>' +
-        '<button class="sub-card-btn" onclick="MrfAuth.startSignup()">Pro 재구독</button>' +
+        '<button class="sub-card-btn" onclick="MrfAuth.unifiedStart()">이용권 구매하기</button>' +
       '</div>';
     } else if(sub && sub.status === 'refund_requested'){
       html = '<div class="sub-card">' +
@@ -9486,7 +9573,7 @@ window.MrfAuth = (function(){
       var days = getTrialDaysLeft();
       if(days <= 3){
         var sub = getSubscription();
-        banner.innerHTML = '⏰ 무료체험 <b>' + days + '일</b> 남음 · ' + _fmtDate(sub.trialEnd) + ' 첫 결제 예정 <a class="tb-btn" href="#" onclick="event.preventDefault();MrfAuth.startCancel()">해지하기</a>';
+        banner.innerHTML = '⏰ 무료체험 <b>' + days + '일</b> 남음 · ' + _fmtDate(sub.trialEnd) + ' 체험 종료 <a class="tb-btn" href="#" onclick="event.preventDefault();MrfAuth.startCancel()">해지하기</a>';
         banner.classList.add('show');
       } else {
         banner.classList.remove('show');
@@ -9582,14 +9669,14 @@ window.MrfAuth = (function(){
 
   function refreshFromServer(){
     var tok = _token();
-    if(!tok) return;
-    _api('/api/session', { method: 'GET' }).then(function(data){
+    if(!tok) return Promise.resolve();
+    return _api('/api/session', { method: 'GET' }).then(function(data){
       _applyServerState(data);
       updateAllUI();
     }).catch(function(err){
       if(err.status === 401){
         // Session expired/invalid — log out locally so the UI doesn't show stale state
-        _del(KEY_USER); _del(KEY_SUB); _del(KEY_PAYMENTS); _setToken(null);
+        _del(KEY_USER); _del(KEY_SUB); _del(KEY_PAYMENTS); _del(KEY_ORDER); _setToken(null);
         updateAllUI();
       }
     });
@@ -9610,6 +9697,10 @@ window.MrfAuth = (function(){
     // flows
     startSignup: startSignup,
     submitPayment: submitPayment,
+    pickPlan: pickPlan, onReceiptType: onReceiptType, copyAccount: copyAccount,
+    cancelOrder: cancelOrder, checkOrder: checkOrder, getOrder: getOrder,
+    renderOrderNotice: renderOrderNotice, adminRender: adminRender, adminAct: adminAct,
+    refreshFromServer: refreshFromServer,
     _requireAgree: _requireAgree,
     loginKakao: loginKakao,
     loginKakaoSignup: function(){
@@ -9641,7 +9732,7 @@ window.MrfAuth = (function(){
       if(user){
         // 이미 로그인 → 결제 모달로 바로 이동 (기존 세션 토큰으로 재구독 처리됨)
         pendingEmail = user.email;
-        pendingPlanType = 'monthly';
+        pendingPlanType = pendingPlanType === 'once' ? 'once' : 'annual';
         _preparePaymentModal(user.email);
       } else {
         // 미로그인 → 회원가입 모달 열고 완료 후 결제로 이어지도록 플래그 설정
@@ -9654,6 +9745,7 @@ window.MrfAuth = (function(){
     // constants
     PRICE_MONTHLY: PRICE_MONTHLY,
     PRICE_ONCE: PRICE_ONCE,
+    PRICE_ANNUAL: PRICE_ANNUAL,
     TRIAL_DAYS: TRIAL_DAYS
   };
 })();
@@ -10948,6 +11040,7 @@ window.MrfSubscriptionView = {
   render: function(){
     this.renderStatus();
     this.renderHistory();
+    if(window.MrfAuth){ MrfAuth.renderOrderNotice(); MrfAuth.adminRender(); }
   },
 
   renderStatus: function(){
@@ -10965,7 +11058,7 @@ window.MrfSubscriptionView = {
 
     if(status === 'trial'){
       var tDays = MrfAuth.getTrialDaysLeft ? MrfAuth.getTrialDaysLeft() : 0;
-      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🎁</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">무료 체험 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + tDays + '일</b> · ' + fmt(info.trialEnd) + ' 첫 결제 예정</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 관리</button>';
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🎁</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">무료 체험 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">이용 잔여 기간: <b style="color:var(--fg)">' + tDays + '일</b> · ' + fmt(info.trialEnd) + ' 체험 종료</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 관리</button>';
     } else if(status === 'active'){
       var pDays = MrfAuth.getPeriodDaysLeft ? MrfAuth.getPeriodDaysLeft() : 0;
       el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;padding:16px 0"><div style="width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">✨</div><div><div style="font-size:16px;font-weight:800;color:var(--fg)">Pro 구독 중</div><div style="font-size:13px;color:var(--dim);margin-top:4px">월정액 자동결제 · 이용 잔여 기간: <b style="color:var(--fg)">' + pDays + '일</b> (다음 결제 ' + fmt(info.periodEnd) + ')</div></div></div><button onclick="MrfAuth.startCancel()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--dim);border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer">구독 해지</button>';
@@ -10995,7 +11088,7 @@ window.MrfSubscriptionView = {
       var dateStr = d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
       return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)">' +
         '<div><div style="font-size:13.5px;font-weight:700;color:var(--fg)">' + p.planName + '</div>' +
-        '<div style="font-size:12px;color:var(--dim);margin-top:2px">' + dateStr + ' · ' + p.method + (p.cardLast4 ? ' ****' + p.cardLast4 : '') + '</div></div>' +
+        '<div style="font-size:12px;color:var(--dim);margin-top:2px">' + dateStr + ' · ' + p.method + (p.cardLast4 ? ' ****' + p.cardLast4 : '') + (p.receipt ? ' · ' + p.receipt : '') + '</div></div>' +
         '<div style="text-align:right"><div style="font-size:13.5px;font-weight:700;color:var(--fg)">' + Number(p.amount).toLocaleString() + '원</div>' +
         '<div style="font-size:11.5px;color:#22c55e;margin-top:2px">' + p.status + '</div></div></div>';
     }).join('');
