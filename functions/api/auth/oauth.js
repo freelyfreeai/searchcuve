@@ -108,6 +108,7 @@ export async function onRequestPost({ request, env }) {
     isNew,
     user: { email: user.email, name: user.name, provider: user.provider },
     subscription: user.subscription || null,
-    payments: user.payments || []
+    payments: user.payments || [],
+    order: user.order || null
   });
 }
