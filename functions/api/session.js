@@ -39,6 +39,7 @@ export async function onRequestGet({ request, env }) {
   return json({
     user: { email: user.email, provider: user.provider, name: user.name || '' },
     subscription: user.subscription || null,
-    payments: user.payments || []
+    payments: user.payments || [],
+    order: user.order || null
   });
 }
